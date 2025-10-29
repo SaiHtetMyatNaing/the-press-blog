@@ -27,6 +27,27 @@ const createSlug = (title: string) =>
   faker.string.uuid().slice(0, 4);
 
 async function main() {
+  // Clear existing data (optional, but recommended for clean seeding)
+  console.log("🗑️  Clearing existing data...");
+  await prisma.post.deleteMany();
+  await prisma.category.deleteMany();
+  await prisma.user.deleteMany();
+
+  // Create Users first
+  console.log("👤 Creating users...");
+  const users = [];
+  for (let i = 0; i < 10; i++) {
+    const user = await prisma.user.create({
+      data: {
+        name: faker.person.fullName(),
+        email: faker.internet.email(),
+        image: faker.image.avatar(),
+      },
+    });
+    users.push(user);
+    console.log(`  ✓ Created user: ${user.name}`);
+  }
+
   // Create Categories
   const categories = [
     { title: "Technology" },
@@ -46,28 +67,42 @@ async function main() {
     console.log(`  ✓ Created category: ${category.title}`);
   }
 
+  // Create Posts
+  console.log("📝 Creating posts...");
+  let totalPosts = 0;
+
   for (const category of createdCategories) {
     const numberOfPosts = faker.number.int({ min: 3, max: 5 });
 
     for (let i = 0; i < numberOfPosts; i++) {
       const title = faker.lorem.sentence({ min: 5, max: 10 });
       const content = faker.lorem.paragraphs({ min: 5, max: 10 }, `\n\n`);
+      
+      // Pick a random user as author
+      const randomUser = users[faker.number.int({ min: 0, max: users.length - 1 })];
 
-      const post: Prisma.PostCreateInput = await prisma.post.create({
+      await prisma.post.create({
         data: {
           title,
-          slug: generateSlug(title),
+          slug: generateSlug(title) + "-" + faker.string.uuid().slice(0, 4), // Ensure uniqueness
           excerpt: faker.lorem.paragraph(),
           content: content,
           thumbnail: faker.image.url(),
           readingTime: calculateReadingTime(content),
-          authorId: faker.string.uuid(),
-          authorName: faker.person.fullName(),
-          categoryId : category.id
+          authorId: randomUser.id, // Use actual user ID
+          categoryId: category.id,
         },
       });
+      
+      totalPosts++;
     }
+    console.log(`  ✓ Created ${numberOfPosts} posts for ${category.title}`);
   }
+
+  console.log(`\n✅ Seeding completed successfully!`);
+  console.log(`   - ${users.length} users created`);
+  console.log(`   - ${createdCategories.length} categories created`);
+  console.log(`   - ${totalPosts} posts created`);
 }
 
 main()

@@ -14,6 +14,7 @@ export const getAllPosts = cache(
           skip,
           take: limit,
           include: {
+            author: true,
             category: {
               select: {
                 id: true,
@@ -43,23 +44,75 @@ export const getAllPosts = cache(
   }
 );
 
-// Get all post by Id 
-export const getPostById = cache(async(id: string): Promise<Post> => {
-    const single_post = await prisma.post.findUnique({
-        where: { id },
-        include: {
-            category: {
-                select: {
-                    id: true,
-                    title: true,
-                }
-            }
-        }
-    })
-    
-    if (!single_post) {
-        throw new Error("Post not found")
-    }
-    
-    return single_post
-})
+// Get all post by Id
+export const getPostById = cache(async (id: string): Promise<Post> => {
+  const single_post = await prisma.post.findUnique({
+    where: { id },
+    include: {
+      author: true,
+      category: {
+        select: {
+          id: true,
+          title: true,
+        },
+      },
+    },
+  });
+
+  if (!single_post) {
+    throw new Error("Post not found");
+  }
+
+  return single_post;
+});
+
+// Counting the posts by author Id
+export async function getPostCountByAuthorId(
+  authorId: string
+): Promise<number> {
+  return await prisma.post.count({
+    where: {
+      authorId: authorId,
+    },
+  });
+}
+
+//get related post by Category id
+export async function getRelatedPosts(
+  postId: string,
+  categoryId: string,
+  limit: number = 3
+) {
+  const relatedPosts = await prisma.post.findMany({
+    where: {
+      categoryId: categoryId,
+      NOT: {
+        id: postId, // Exclude the current post
+      },
+    },
+    select: {
+      id: true,
+      title: true,
+      slug: true,
+      excerpt: true, 
+      thumbnail: true,
+      readingTime: true,
+      createdAt: true,
+      author: {
+        select: {
+          name: true,
+          image: true,
+        },
+      },
+      category: {
+        select: {
+          id: true,
+          title: true, // ✅ Only category title
+        },
+      },
+    },
+    take: limit,
+  });
+
+  return relatedPosts;
+}

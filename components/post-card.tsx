@@ -1,25 +1,27 @@
 import Link from "next/link"
 import Image from "next/image"
 import { ArrowRight } from "lucide-react"
-import {Post } from "@/server/types/posts"
+import {PostPreview } from "@/server/types/posts"
 
-export default function PostCard({ post }: {post : Post}) {
+export default function PostCard({ post }: { post: PostPreview }) {
   return (
     <Link href={`/article/${post.id}`}>
       <article className="group h-full flex flex-col bg-card rounded-sm overflow-hidden hover:shadow-lg transition-shadow duration-300 cursor-pointer">
         {/* Image Container */}
         <div className="relative overflow-hidden bg-muted h-48 sm:h-56 md:h-64">
           <Image
-            src={post.thumbnail || "/placeholder.svg"}
+            src={post.thumbnail ?? "/placeholder.svg"}
             alt={post.title}
             fill
             className="object-cover group-hover:scale-105 transition-transform duration-300"
           />
-          <div className="absolute top-4 left-4">
-            <span className="inline-block px-3 py-1 bg-primary text-primary-foreground text-xs font-medium rounded-sm">
-              {post.category.title}
-            </span>
-          </div>
+          {post.category?.title && (
+            <div className="absolute top-4 left-4">
+              <span className="inline-block px-3 py-1 bg-primary text-primary-foreground text-xs font-medium rounded-sm">
+                {post.category.title}
+              </span>
+            </div>
+          )}
         </div>
 
         {/* Content */}
@@ -45,13 +47,19 @@ export default function PostCard({ post }: {post : Post}) {
           {/* Footer */}
           <div className="flex items-center justify-between pt-4 border-t border-border">
             <div className="flex flex-col gap-1">
-              <p className="text-xs font-medium text-foreground">{post.authorName}</p>
-              <p className="text-xs text-muted-foreground">{post.readingTime} min read</p>
+              {post.author?.name ? (
+                <p className="text-xs font-medium text-foreground">{post.author.name}</p>
+              ) : (
+                <p className="text-xs font-medium text-foreground">Unknown Author</p>
+              )}
+              {post.readingTime != null ? (
+                <p className="text-xs text-muted-foreground">{post.readingTime} min read</p>
+              ) : null}
             </div>
             <ArrowRight className="w-5 h-5 text-primary group-hover:translate-x-1 transition-transform" />
           </div>
         </div>
       </article>
     </Link>
-  )
+  );
 }
