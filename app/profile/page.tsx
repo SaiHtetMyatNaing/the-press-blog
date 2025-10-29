@@ -5,33 +5,9 @@ import { useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
 import Link from "next/link"
 import { Edit2, Trash2, Plus } from "lucide-react"
+import { SAMPLE_POSTS } from "@/lib/posts"
 
-const SAMPLE_POSTS = [
-  {
-    id: "1",
-    title: "The Future of AI in Web Development",
-    excerpt: "Exploring how artificial intelligence is transforming the way we build web applications.",
-    content: "AI is revolutionizing web development...",
-    category: "Tech",
-    thumbnail: "/artificial-intelligence-technology.png",
-    readingTime: 8,
-    authorId: "user1",
-    authorName: "John Doe",
-    createdAt: new Date("2024-01-15"),
-  },
-  {
-    id: "2",
-    title: "Understanding React Server Components",
-    excerpt: "A deep dive into React Server Components and how they improve performance.",
-    content: "React Server Components are a game changer...",
-    category: "Tech",
-    thumbnail: "/blog-article.jpg",
-    readingTime: 10,
-    authorId: "user1",
-    authorName: "John Doe",
-    createdAt: new Date("2024-01-10"),
-  },
-]
+
 
 export default function ProfilePage() {
   const { user } = useAuth()

@@ -5,7 +5,6 @@ import type React from "react"
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { useAuth } from "@/lib/auth-context"
-import { ArrowLeft } from "lucide-react"
 import Link from "next/link"
 
 const CATEGORIES = ["Tech", "Finance", "Lifestyle", "Other"]

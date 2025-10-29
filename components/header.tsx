@@ -32,6 +32,9 @@ export default function Header() {
 
           <nav className="hidden md:flex items-center gap-6">
             <Link href="/" className="text-sm font-medium text-foreground hover:text-primary transition-colors">
+              Home
+            </Link>
+            <Link href="/blogs" className="text-sm font-medium text-foreground hover:text-primary transition-colors">
               Blogs
             </Link>
             {user && (
