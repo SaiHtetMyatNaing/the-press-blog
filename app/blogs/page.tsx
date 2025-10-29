@@ -1,10 +1,10 @@
+// PostsPage.tsx - server component
 import CategoryFilterSkeleton from "@/components/blog/blog-category-filtered-skeleton";
-import CategoryFilter from "@/components/blog/blog-filtered";
-import PostGrid from "@/components/blog/blog-grid";
 import { PostGridSkeleton } from "@/components/blog/blog-grid-skeleton";
-import { getAllCategories } from "@/server/dal/categories";
-import { getAllPosts } from "@/server/dal/posts";
+import Categories from "@/components/blog/Categories";
+import Posts from "@/components/blog/Posts";
 import { Suspense } from "react";
+
 
 export default async function PostsPage({
   searchParams,
@@ -14,8 +14,6 @@ export default async function PostsPage({
   const params = await searchParams;
   const categorySlug = params?.category;
   const page = params?.page ? parseInt(params.page, 10) : 1;
-  const categories = await getAllCategories();
-  const displayPosts = await getAllPosts(categorySlug, page, 10);
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
@@ -26,15 +24,12 @@ export default async function PostsPage({
         <div className="w-16 h-1 bg-primary rounded-full" />
       </header>
       <Suspense fallback={<CategoryFilterSkeleton/>}>
-        <CategoryFilter
-          selectedCategory={categorySlug}
-          categories={categories}
-        />
+        <Categories selectedCategory={categorySlug} />
       </Suspense>
-
       <Suspense fallback={<PostGridSkeleton />}>
-        <PostGrid displayPosts={displayPosts} />
+        <Posts categorySlug={categorySlug} page={page} limit={12}/>
       </Suspense>
     </div>
   );
 }
+

@@ -3,7 +3,7 @@ import PostCard from "./blog-card"
 
 export default async function PostGrid({displayPosts} : {displayPosts : getAllPostsResult}) {
   return (
-    <section className="bg-background">
+    <section className="bg-background mb-10">
       <div className="max-w-7xl mx-auto">
         <div className="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
          
