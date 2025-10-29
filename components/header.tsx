@@ -31,7 +31,7 @@ export default function Header() {
           </Link>
 
           <nav className="hidden md:flex items-center gap-6">
-            <Link href="/" className="text-sm font-medium text-foreground hover:text-primary transition-colors">
+            <Link href="/blogs" className="text-sm font-medium text-foreground hover:text-primary transition-colors">
               Blogs
             </Link>
             {user && (

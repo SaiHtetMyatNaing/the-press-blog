@@ -5,12 +5,18 @@ import { Post } from "../types/posts";
 
 // Get All Posts by using pagination
 export const getAllPosts = cache(
-  async (page: number = 1, limit: number = 10) => {
+  async (categorySlug?: string, page: number = 1, limit: number = 10) => {
+    
+    //filtered by category
+    const whereCondition = categorySlug
+      ? { category: { title: categorySlug } }
+      : {};
     try {
       const skip = (page - 1) * limit;
 
       const [posts, total] = await prisma.$transaction([
         prisma.post.findMany({
+          where: whereCondition,
           skip,
           take: limit,
           include: {
@@ -94,7 +100,7 @@ export async function getRelatedPosts(
       id: true,
       title: true,
       slug: true,
-      excerpt: true, 
+      excerpt: true,
       thumbnail: true,
       readingTime: true,
       createdAt: true,

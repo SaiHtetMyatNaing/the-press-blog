@@ -1,5 +1,5 @@
 import { getRelatedPosts } from "@/server/dal/posts";
-import PostCard from "./post-card"
+import PostCard from "./blog/blog-card";
 
 
 export default async function RelatedPosts({ currentId  ,categoryId}: { currentId: string , categoryId : string}) {
