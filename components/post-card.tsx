@@ -1,22 +1,9 @@
 import Link from "next/link"
 import Image from "next/image"
 import { ArrowRight } from "lucide-react"
+import {Post } from "@/server/types/posts"
 
-interface PostCardProps {
-  post: {
-    id: string
-    title: string
-    excerpt: string
-    thumbnail: string
-    category: string
-    authorName: string
-    readingTime: number
-    createdAt: Date
-  }
-  featured?: boolean
-}
-
-export default function PostCard({ post, featured }: PostCardProps) {
+export default function PostCard({ post }: {post : Post}) {
   return (
     <Link href={`/article/${post.id}`}>
       <article className="group h-full flex flex-col bg-card rounded-sm overflow-hidden hover:shadow-lg transition-shadow duration-300 cursor-pointer">
@@ -30,7 +17,7 @@ export default function PostCard({ post, featured }: PostCardProps) {
           />
           <div className="absolute top-4 left-4">
             <span className="inline-block px-3 py-1 bg-primary text-primary-foreground text-xs font-medium rounded-sm">
-              {post.category}
+              {post.category.title}
             </span>
           </div>
         </div>
