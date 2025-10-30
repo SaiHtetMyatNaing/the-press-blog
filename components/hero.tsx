@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { faker } from '@faker-js/faker';
 
 export default function Hero() {
-  const heroImage = faker.image.urlLoremFlickr({ category: 'blog,technology', width: 900, height: 1600 });
+  const heroImage = faker.image.url();
 
   return (
     <section className="bg-muted py-16 sm:py-24 lg:py-32 min-h-[600px] lg:min-h-[700px]">
