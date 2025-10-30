@@ -1,6 +1,7 @@
 import { getAllPostsResult, Post } from "@/server/types/posts";
 import PostCard from "./blog-card";
 import Link from "next/link";
+import BlogSearch from "./blog-search";
 
 export default async function PostGrid({
   displayPosts,
@@ -10,7 +11,9 @@ export default async function PostGrid({
   return (
     <section className="bg-background mb-10">
       <div className="max-w-7xl mx-auto">
-  
+        <div className="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        </div>
+
         {/* Asymmetrical Grid Layout with uniform card heights */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {displayPosts &&

@@ -38,7 +38,7 @@ export const getAllPosts = cache(
           },
         ];
       }
-      
+
     try {
       const skip = (page - 1) * limit;
 
@@ -73,6 +73,7 @@ export const getAllPosts = cache(
         },
       };
     } catch (error) {
+      console.error("Posts fetch failed:", error);
       throw new Error("Failed to Fetch Posts");
     }
   }
