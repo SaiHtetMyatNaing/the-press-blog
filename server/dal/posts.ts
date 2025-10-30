@@ -5,39 +5,41 @@ import { Post } from "../types/posts";
 
 // Get All Posts by using pagination
 export const getAllPosts = cache(
-  async (categorySlug?: string, page: number = 1, limit: number = 10 ,searchQuery?: string) => {
-    
-    const whereCondition : any = {}
-    
+  async (
+    categorySlug?: string,
+    page: number = 1,
+    limit: number = 10,
+    searchQuery?: string
+  ) => {
+    const whereCondition: any = {};
 
-    if(categorySlug){
-      whereCondition.category = {title : categorySlug}
+    if (categorySlug) {
+      whereCondition.category = { title: categorySlug };
     }
 
-
-     // Add search filter
-      if (searchQuery && searchQuery.trim()) {
-        whereCondition.OR = [
-          {
-            title: {
-              contains: searchQuery,
-              mode: "insensitive",
-            },
+    // Add search filter
+    if (searchQuery && searchQuery.trim()) {
+      whereCondition.OR = [
+        {
+          title: {
+            contains: searchQuery,
+            mode: "insensitive",
           },
-          {
-            excerpt: {
-              contains: searchQuery,
-              mode: "insensitive",
-            },
+        },
+        {
+          excerpt: {
+            contains: searchQuery,
+            mode: "insensitive",
           },
-          {
-            content: {
-              contains: searchQuery,
-              mode: "insensitive",
-            },
+        },
+        {
+          content: {
+            contains: searchQuery,
+            mode: "insensitive",
           },
-        ];
-      }
+        },
+      ];
+    }
 
     try {
       const skip = (page - 1) * limit;
@@ -110,6 +112,10 @@ export async function getPostCountByAuthorId(
       authorId: authorId,
     },
   });
+}
+
+export async function getPostCount(){
+   return await prisma.post.count()
 }
 
 //get related post by Category id
