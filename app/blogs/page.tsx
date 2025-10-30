@@ -9,12 +9,13 @@ import { Suspense } from "react";
 export default async function PostsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ category?: string; page?: string }>;
+  searchParams: Promise<{ category?: string; page?: string , search?:string}>;
 }) {
   const params = await searchParams;
   const categorySlug = params?.category;
+  const search  = params?.search;
   const page = params?.page ? parseInt(params.page, 10) : 1;
-
+  
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
       <header className="mb-8">
@@ -23,12 +24,8 @@ export default async function PostsPage({
         </h1>
         <div className="w-16 h-1 bg-primary rounded-full" />
       </header>
-      <Suspense fallback={<CategoryFilterSkeleton/>}>
         <Categories selectedCategory={categorySlug} />
-      </Suspense>
-      <Suspense fallback={<PostGridSkeleton />}>
-        <Posts categorySlug={categorySlug} page={page} limit={12}/>
-      </Suspense>
+        <Posts categorySlug={categorySlug} page={page} limit={12} search={search}/>
     </div>
   );
 }

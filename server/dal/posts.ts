@@ -5,12 +5,40 @@ import { Post } from "../types/posts";
 
 // Get All Posts by using pagination
 export const getAllPosts = cache(
-  async (categorySlug?: string, page: number = 1, limit: number = 10) => {
+  async (categorySlug?: string, page: number = 1, limit: number = 10 ,searchQuery?: string) => {
     
-    //filtered by category
-    const whereCondition = categorySlug
-      ? { category: { title: categorySlug } }
-      : {};
+    const whereCondition : any = {}
+    
+
+    if(categorySlug){
+      whereCondition.category = {title : categorySlug}
+    }
+
+
+     // Add search filter
+      if (searchQuery && searchQuery.trim()) {
+        whereCondition.OR = [
+          {
+            title: {
+              contains: searchQuery,
+              mode: "insensitive",
+            },
+          },
+          {
+            excerpt: {
+              contains: searchQuery,
+              mode: "insensitive",
+            },
+          },
+          {
+            content: {
+              contains: searchQuery,
+              mode: "insensitive",
+            },
+          },
+        ];
+      }
+      
     try {
       const skip = (page - 1) * limit;
 

@@ -2,6 +2,7 @@
 
 import { SelectCategory } from "@/server/types/categories";
 import { useRouter, useSearchParams } from "next/navigation";
+import BlogSearch from "./blog-search";
 
 
 export default function CategoryFilter({ selectedCategory , categories }: { selectedCategory?: string , categories : SelectCategory[]}) {
@@ -21,6 +22,7 @@ export default function CategoryFilter({ selectedCategory , categories }: { sele
   }
 
   return (
+    <div className="flex justify-between items cetner ">
    <div className="flex flex-wrap gap-2">
       <button
         onClick={() => selectCategory(undefined)}
@@ -45,6 +47,8 @@ export default function CategoryFilter({ selectedCategory , categories }: { sele
           {category.title}
         </button>
       ))}
+    </div>
+    <BlogSearch/>
     </div>
   );
 }
