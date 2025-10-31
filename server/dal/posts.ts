@@ -82,7 +82,7 @@ export const getAllPosts = cache(
 );
 
 // Get all post by slug
-export const getPostById = cache(async (slug: string): Promise<Post> => {
+export const getPostBySlug = cache(async (slug: string): Promise<Post> => {
   const single_post = await prisma.post.findUnique({
     where: { slug },
     include: {

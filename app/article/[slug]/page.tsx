@@ -6,7 +6,7 @@ import SocialShare from "@/components/social-share";
 import AuthorBio from "@/components/author-bio";
 import RelatedPosts from "@/components/related-posts";
 import Newsletter from "@/components/newsletter";
-import { getPostById, getPostCountByAuthorId } from "@/server/dal/posts";
+import { getPostBySlug, getPostCountByAuthorId } from "@/server/dal/posts";
 
 export default async function ArticlePage({
   params,
@@ -17,7 +17,7 @@ export default async function ArticlePage({
   const { slug } = await params;
 
   // Find the article directly on the server
-  const article = await getPostById(slug);
+  const article = await getPostBySlug(slug);
   const postCount = await getPostCountByAuthorId(article.authorId);
   // If article not found, trigger 404
   if (!article) {

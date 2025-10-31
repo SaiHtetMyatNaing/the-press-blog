@@ -15,11 +15,10 @@ export default async function Categories({
   );
 
   return (
-    <Suspense  fallback={<CategoryFilterSkeleton />}>
-      <CategoryFilter
+    <>      <CategoryFilter
         categories={uniqueCategories}
-        selectedCategory={selectedCategory}
-      />;
-    </Suspense>
+        selectedCategory={selectedCategory}/>;
+    </>
+
   );
 }

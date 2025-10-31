@@ -1,4 +1,4 @@
-import { Prisma } from "@/src/generated/client";
+import { Prisma } from "@prisma/client";
 
 // Get all post pagination
 export type Pagination = {
