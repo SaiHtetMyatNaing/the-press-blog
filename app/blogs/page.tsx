@@ -28,7 +28,6 @@ export default async function PostsPage({
         limit={12}
         search={search}
       />
-      <BlogPagination/>
     </div>
   );
 }

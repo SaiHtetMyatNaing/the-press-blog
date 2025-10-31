@@ -1,60 +1,66 @@
+"use client"
 import {
   Pagination,
   PaginationContent,
   PaginationItem,
-  PaginationLink,
-  PaginationNext,
   PaginationPrevious,
+  PaginationNext,
+  PaginationLink,
+  PaginationEllipsis,
 } from "../ui/pagination";
-import { getPostCount } from "@/server/dal/posts";
+import { useSearchParams } from "next/navigation";
 
-const POSTS_PER_PAGE = 12;
-
-interface BlogPaginationProps {
-  searchParams?: Promise<{ page?: string }>;
-}
-
-export default async function BlogPagination({ searchParams }: BlogPaginationProps) {
-  const params = await searchParams
-  const currentPage = await Number(params?.page) || 1;
-  const totalPosts = await getPostCount();
-  const totalPages = Math.ceil(totalPosts / POSTS_PER_PAGE);
+export default async function BlogPagination(
+  {pages } : { pages : number}
+) {
+  const searchParams = useSearchParams()
+  const params = new URLSearchParams(searchParams)
   
-  // Don't render pagination if only 1 page or no posts
-  if (totalPages <= 1) return null;
+  const pageNumber = params.get('page')
+  const category   = params.get('category')
 
-  const hasPrevious = currentPage > 1;
-  const hasNext = currentPage < totalPages;
+  // Function to build URL based on parameters
+  const buildUrl = (page: number) => {
+    const newParams = new URLSearchParams()
+    
+    // Always add page parameter
+    newParams.set('page', page.toString())
+    
+    // Only add category if it exists
+    if (category) {
+      newParams.set('category', category)
+    }
+    
+    return `?${newParams.toString()}`
+  }
 
   return (
     <Pagination>
       <PaginationContent>
-        <PaginationItem>
-          <PaginationPrevious 
-            href={hasPrevious ? `?page=${currentPage - 1}` : "#"}
-            aria-disabled={!hasPrevious}
-            className={!hasPrevious ? "pointer-events-none opacity-50" : ""}
-          />
-        </PaginationItem>
-        
-        {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-          <PaginationItem key={page}>
-            <PaginationLink 
-              href={`?page=${page}`}
-              isActive={page === currentPage}
-            >
-              {page}
-            </PaginationLink>
-          </PaginationItem>
-        ))}
-        
-        <PaginationItem>
-          <PaginationNext 
-            href={hasNext ? `?page=${currentPage + 1}` : "#"}
-            aria-disabled={!hasNext}
-            className={!hasNext ? "pointer-events-none opacity-50" : ""}
-          />
-        </PaginationItem>
+        {/* Previous */}
+        {/* <PaginationItem>
+          <PaginationPrevious href={"#"} />
+        </PaginationItem> */}
+
+        {/* Page Links
+        {pages.map((p, i) =>
+          p === "ellipsis" ? (
+            <PaginationItem key={`ell-${i}`}>
+              <PaginationEllipsis />
+            </PaginationItem>
+          ) : (
+            <PaginationItem key={p}>
+              <PaginationLink href={buildUrl(p)} isActive={p === current}>
+                {p}
+              </PaginationLink>
+            </PaginationItem>
+          )
+        )} */}
+
+        {/* Next */}
+        {/* <PaginationItem>
+          <PaginationNext href={"#"} />
+        </PaginationItem> */}
       </PaginationContent>
     </Pagination>
   );

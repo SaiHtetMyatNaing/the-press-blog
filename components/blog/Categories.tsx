@@ -11,10 +11,15 @@ export default async function Categories({
   selectedCategory?: string;
 }) {
   const categories = await getAllCategories();
+   
+  const uniqueCategories = Array.from(
+    new Map(categories.map(cat => [cat.title, cat])).values()
+  );
+
   return (
     <Suspense  fallback={<CategoryFilterSkeleton />}>
       <CategoryFilter
-        categories={categories}
+        categories={uniqueCategories}
         selectedCategory={selectedCategory}
       />;
     </Suspense>

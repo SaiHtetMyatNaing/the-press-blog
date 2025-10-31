@@ -27,11 +27,6 @@ const createSlug = (title: string) =>
   faker.string.uuid().slice(0, 4);
 
 async function main() {
-  // Clear existing data (optional, but recommended for clean seeding)
-  console.log("🗑️  Clearing existing data...");
-  await prisma.post.deleteMany();
-  await prisma.category.deleteMany();
-  await prisma.user.deleteMany();
 
   // Create Users first
   console.log("👤 Creating users...");

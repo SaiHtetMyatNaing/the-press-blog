@@ -17,7 +17,6 @@ export default function CategoryFilter({ selectedCategory , categories }: { sele
     } else {
       params.delete("category");
     }
-    params.set("page", "1"); // reset page on filter change
     router.push(`/blogs?${params.toString()}`);
   }
 

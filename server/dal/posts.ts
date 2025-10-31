@@ -2,8 +2,9 @@ import "server-only";
 import { cache } from "react";
 import { prisma } from "../db/prisma";
 import { Post } from "../types/posts";
+import { Prisma } from "@/src/generated/client";
 
-// Get All Posts by using pagination
+ // Unified function to get all posts with optional category filter
 export const getAllPosts = cache(
   async (
     categorySlug?: string,
@@ -11,46 +12,41 @@ export const getAllPosts = cache(
     limit: number = 10,
     searchQuery?: string
   ) => {
-    const whereCondition: any = {};
+    // Validate and sanitize inputs
+    const safePage = Math.max(1, page);
+    const safeLimit = Math.min(Math.max(1, limit), 100);
 
+    const whereCondition: Prisma.PostWhereInput = {};
+
+    // Add category filter
     if (categorySlug) {
-      whereCondition.category = { title: categorySlug };
+      whereCondition.category = { 
+        title: {
+          equals: categorySlug,
+          mode: "insensitive"
+        }
+      };
     }
 
     // Add search filter
-    if (searchQuery && searchQuery.trim()) {
+    if (searchQuery?.trim()) {
       whereCondition.OR = [
-        {
-          title: {
-            contains: searchQuery,
-            mode: "insensitive",
-          },
-        },
-        {
-          excerpt: {
-            contains: searchQuery,
-            mode: "insensitive",
-          },
-        },
-        {
-          content: {
-            contains: searchQuery,
-            mode: "insensitive",
-          },
-        },
+        { title: { contains: searchQuery, mode: "insensitive" } },
+        { excerpt: { contains: searchQuery, mode: "insensitive" } },
+        { content: { contains: searchQuery, mode: "insensitive" } },
       ];
     }
 
     try {
-      const skip = (page - 1) * limit;
+      const skip = (safePage - 1) * safeLimit;
 
       const [posts, total] = await prisma.$transaction([
         prisma.post.findMany({
           where: whereCondition,
           skip,
-          take: limit,
+          take: safeLimit,
           include: {
-            author: true,
+            author : true,
             category: {
               select: {
                 id: true,
@@ -62,21 +58,25 @@ export const getAllPosts = cache(
             createdAt: "desc",
           },
         }),
-        prisma.post.count(),
+        prisma.post.count({ where: whereCondition }),
       ]);
+
+      const totalPages = Math.ceil(total / safeLimit);
 
       return {
         posts,
         pagination: {
+          page: safePage,
+          limit: safeLimit,
           total,
-          page,
-          limit,
-          totalPages: Math.ceil(total / limit),
+          totalPages,
+          hasNextPage: safePage < totalPages,
+          hasPrevPage: safePage > 1,
         },
       };
     } catch (error) {
       console.error("Posts fetch failed:", error);
-      throw new Error("Failed to Fetch Posts");
+      throw new Error("Failed to fetch posts");
     }
   }
 );
@@ -117,6 +117,7 @@ export async function getPostCountByAuthorId(
 export async function getPostCount(){
    return await prisma.post.count()
 }
+
 
 //get related post by Category id
 export async function getRelatedPosts(
