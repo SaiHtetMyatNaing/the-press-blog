@@ -17,8 +17,6 @@ export default async function Posts({
   const displayPosts = await getAllPosts(categorySlug, page, limit ,search);
 
   return (
-    <Suspense fallback={<PostGridSkeleton />}>
       <PostGrid displayPosts={displayPosts} />
-    </Suspense>
   );
 }
