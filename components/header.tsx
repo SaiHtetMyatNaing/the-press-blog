@@ -2,8 +2,8 @@
 
 import { useState } from "react"
 import Link from "next/link"
-import { useRouter } from "next/navigation"
-import { Search, Menu, X, LogOut, User } from "lucide-react"
+import { usePathname, useRouter } from "next/navigation"
+import { Menu, X, LogOut, User } from "lucide-react"
 import { useAuth } from "@/lib/auth-context"
 
 export default function Header() {
@@ -11,11 +11,36 @@ export default function Header() {
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false)
   const { user, logout } = useAuth()
   const router = useRouter()
+  const pathname = usePathname()
 
   const handleLogout = () => {
     logout()
     setIsUserMenuOpen(false)
     router.push("/")
+  }
+
+  /* ---------- Desktop: Active = primary + bold (no underline) ---------- */
+  const desktopLink = (href: string) => {
+    const active = pathname === href
+    return `
+      text-sm font-medium transition-colors
+      ${active 
+        ? "text-primary font-bold" 
+        : "text-foreground hover:text-primary"
+      }
+    `.trim().replace(/\s+/g, " ")
+  }
+
+  /* ---------- Mobile: Active = primary + bold + light bg (no underline) ---------- */
+  const mobileLink = (href: string) => {
+    const active = pathname === href
+    return `
+      block px-4 py-2 text-sm font-medium rounded-sm transition-colors
+      ${active 
+        ? "text-primary font-bold bg-secondary/30" 
+        : "text-foreground hover:bg-secondary"
+      }
+    `.trim().replace(/\s+/g, " ")
   }
 
   return (
@@ -27,21 +52,21 @@ export default function Header() {
             <div className="w-8 h-8 bg-primary rounded-sm flex items-center justify-center">
               <span className="text-primary-foreground font-serif font-bold text-lg">03</span>
             </div>
-            <span className="hidden sm:inline font-serif text-lg font-bold text-foreground">The Press</span>
+            <span className="hidden sm:inline font-serif text-lg font-bold text-foreground">
+              The Press
+            </span>
           </Link>
 
-          <nav className="hidden md:flex items-center gap-6">
-            <Link href="/" className="text-sm font-medium text-foreground hover:text-primary transition-colors">
+          {/* Desktop Nav */}
+          <nav className="hidden md:flex items-center gap-8">
+            <Link href="/" className={desktopLink("/")}>
               Home
             </Link>
-            <Link href="/blogs" className="text-sm font-medium text-foreground hover:text-primary transition-colors">
+            <Link href="/blogs" className={desktopLink("/blogs")}>
               Blogs
             </Link>
             {user && (
-              <Link
-                href="/profile"
-                className="text-sm font-medium text-foreground hover:text-primary transition-colors"
-              >
+              <Link href="/profile" className={desktopLink("/profile")}>
                 Profile
               </Link>
             )}
@@ -92,7 +117,7 @@ export default function Header() {
             )}
           </nav>
 
-          {/* Mobile Menu Button */}
+          {/* Mobile toggle */}
           <button
             onClick={() => setIsMenuOpen(!isMenuOpen)}
             className="md:hidden p-2 hover:bg-secondary rounded-sm transition-colors"
@@ -103,21 +128,20 @@ export default function Header() {
 
         {/* Mobile Menu */}
         {isMenuOpen && (
-          <nav className="md:hidden pb-4 space-y-2">
-            <Link
-              href="/"
-              className="block px-4 py-2 text-sm font-medium text-foreground hover:bg-secondary rounded-sm"
-            >
+          <nav className="md:hidden pb-4 space-y-1">
+            <Link href="/" className={mobileLink("/")}>
+              Home
+            </Link>
+            <Link href="/blogs" className={mobileLink("/blogs")}>
               Blogs
             </Link>
             {user && (
-              <Link
-                href="/profile"
-                className="block px-4 py-2 text-sm font-medium text-foreground hover:bg-secondary rounded-sm"
-              >
+              <Link href="/profile" className={mobileLink("/profile")}>
                 Profile
               </Link>
             )}
+
+            {/* Mobile Search */}
             <div className="px-4 pt-2">
               <input
                 type="text"
@@ -125,6 +149,8 @@ export default function Header() {
                 className="w-full px-4 py-2 bg-secondary text-foreground placeholder-muted-foreground rounded-sm text-sm focus:outline-none focus:ring-2 focus:ring-primary"
               />
             </div>
+
+            {/* Mobile Auth */}
             <div className="px-4 pt-4 border-t border-border space-y-2">
               {user ? (
                 <>

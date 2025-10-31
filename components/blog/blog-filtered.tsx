@@ -1,53 +1,65 @@
 "use client";
 
 import { SelectCategory } from "@/server/types/categories";
-import { useRouter, useSearchParams } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
 import BlogSearch from "./blog-search";
+import { cn } from "@/lib/utils";   // shadcn's cn() helper
 
-
-export default function CategoryFilter({ selectedCategory , categories }: { selectedCategory?: string , categories : SelectCategory[]}) {
-  const router = useRouter();
+export default function CategoryFilter({
+  selectedCategory,
+  categories,
+}: {
+  selectedCategory?: string;
+  categories: SelectCategory[];
+}) {
   const searchParams = useSearchParams();
-
-
-  function selectCategory(category: string | undefined) {
+  const pathName = usePathname()
+  /** Build the href for a given category (or "All") */
+  const buildHref = (cat?: string) => {
     const params = new URLSearchParams(searchParams.toString());
-    if (category) {
-      params.set("category", category);
-    } else {
-      params.delete("category");
-    }
-    router.push(`/blogs?${params.toString()}`);
-  }
+    if (cat) params.set("category", cat);
+    else params.delete("category");
+    return `/blogs?${params.toString()}`;
+  };
+
+  // Scale animation (same as before)
+  const clickScale =
+    "transition-all duration-75 active:scale-95 hover:scale-[1.02]";
 
   return (
-    <div className="flex justify-between items cetner ">
-   <div className="flex flex-wrap gap-2">
-      <button
-        onClick={() => selectCategory(undefined)}
-        className={`px-4 py-2 rounded-sm text-sm cursor-pointer font-medium transition-colors ${
-          !selectedCategory
-            ? "bg-primary text-primary-foreground"
-            : "bg-secondary text-foreground hover:bg-secondary/80"
-        }`}
-      >
-        All
-      </button>
-      {categories.map((category) => (
-        <button
-          key={category.id}
-          onClick={() => selectCategory(category.title)}
-          className={`px-4 py-2 rounded-sm text-sm cursor-pointer font-medium transition-colors ${
-            selectedCategory === category.title
-              ? "bg-primary text-primary-foreground"
-              : "bg-secondary text-foreground hover:bg-secondary/80"
-          }`}
-        >
-          {category.title}
-        </button>
-      ))}
-    </div>
-    <BlogSearch/>
+    <div className="flex justify-between items-center">
+      <div className="flex flex-wrap gap-2">
+        {/* "All" link */}
+        <Link href={buildHref()} >
+          <Button
+            variant={!selectedCategory ? "default" : "secondary"}
+            className={cn(clickScale, "cursor-pointer")}
+          >
+            All
+          </Button>
+        </Link>
+
+        {/* Category links */}
+        {categories.map((category) => (
+          <Link
+            key={category.id}
+            href={buildHref(category.title)}
+            >
+            <Button
+              variant={
+                selectedCategory === category.title ? "default" : "secondary"
+              }
+              className={cn(clickScale, "cursor-pointer")}
+            >
+            {category.title}
+            </Button>
+          </Link>
+        ))}
+      </div>
+
+      <BlogSearch />
     </div>
   );
 }

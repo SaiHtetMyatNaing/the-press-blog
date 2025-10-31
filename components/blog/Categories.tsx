@@ -17,7 +17,7 @@ export default async function Categories({
   return (
     <>      <CategoryFilter
         categories={uniqueCategories}
-        selectedCategory={selectedCategory}/>;
+        selectedCategory={selectedCategory}/>
     </>
 
   );
