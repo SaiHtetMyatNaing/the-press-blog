@@ -1,7 +1,7 @@
 import "server-only";
 import { cache } from "react";
 import { prisma } from "../db/prisma";
-import { Post } from "../types/posts";
+import { getAllPostsResult, Post } from "../types/posts";
 import { Prisma } from "@prisma/client";
 
 // Unified function to get all posts with optional category filter
@@ -11,7 +11,7 @@ export const getAllPosts = cache(
     page: number = 1,
     limit: number = 10,
     searchQuery?: string
-  ) => {
+  ): Promise<getAllPostsResult> => {
     // Validate and sanitize inputs
     const safePage = Math.max(1, page);
     const safeLimit = Math.min(Math.max(1, limit), 100);
@@ -33,7 +33,6 @@ export const getAllPosts = cache(
       whereCondition.OR = [
         { title: { contains: searchQuery, mode: "insensitive" } },
         { excerpt: { contains: searchQuery, mode: "insensitive" } },
-        { content: { contains: searchQuery, mode: "insensitive" } },
       ];
     }
 
@@ -51,8 +50,11 @@ export const getAllPosts = cache(
             slug: true,
             excerpt: true,
             createdAt: true,
-            updatedAt: true,
             thumbnail: true,
+            readingTime: true,
+            authorId: true,
+            categoryId: true,
+            updatedAt: true,
             author: {
               select: {
                 id: true,
@@ -60,7 +62,6 @@ export const getAllPosts = cache(
               },
             },
             category: {
-              // you had this in include before — add it back if needed
               select: {
                 id: true,
                 title: true,
@@ -68,7 +69,6 @@ export const getAllPosts = cache(
             },
           },
           orderBy: {
-            // This is CORRECT — top-level
             createdAt: "desc",
           },
         }),
@@ -123,7 +123,7 @@ export async function getPostCountByAuthorId(
 ): Promise<number> {
   return await prisma.post.count({
     where: {
-      authorId: authorId,
+      authorId,
     },
   });
 }
