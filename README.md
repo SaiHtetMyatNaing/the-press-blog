@@ -1,7 +1,7 @@
 # The Press Blog
 
 ## Description
-The Press Blog is a fullstack blogging application built with Next.js and Prisma. It features user authentication with Auth.js, one-to-many relationships, direct database access via a Data Access Layer with Next.js 'use server' directive (instead of API routes), email handling using Resend, image uploads with imagekit.io, and SEO optimization including Open Graph images for social sharing. This project is a personal practice to enhance skills in modern web development, relational database patterns, cloud services, and SEO best practices.
+The Press Blog is a fullstack blogging application built with Next.js and Prisma. It features user authentication with Auth.js, one-to-many relationships, direct database access via a Data Access Layer with Next.js 'use server' directive (instead of API routes), email handling using Resend, image uploads with imagekit.io , neon db, and SEO optimization including Open Graph images for social sharing. This project is a personal practice to enhance skills in modern web development, relational database patterns, cloud services, and SEO best practices.
 
 ## Table of Contents
 - [Usage](#usage)
