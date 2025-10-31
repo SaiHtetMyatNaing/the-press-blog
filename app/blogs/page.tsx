@@ -1,6 +1,5 @@
 // PostsPage.tsx - server component
 import Categories from "@/components/blog/Categories";
-import BlogPagination from "@/components/blog/Pagination";
 import Posts from "@/components/blog/Posts";
 
 export const dynamic = 'force-dynamic';
