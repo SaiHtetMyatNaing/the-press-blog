@@ -2,7 +2,6 @@ import "server-only"
 import {cache} from "react";
 import { prisma } from "../db/prisma";
 
-
 // Get all categories (to filter the UI)
 export const getAllCategories = cache(async()=>{
     try {

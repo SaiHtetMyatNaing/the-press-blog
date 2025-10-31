@@ -2,7 +2,7 @@ import "server-only";
 import { cache } from "react";
 import { prisma } from "../db/prisma";
 import { Post } from "../types/posts";
-import { Prisma } from "@/src/generated/client";
+import { Prisma } from "@prisma/client";
 
  // Unified function to get all posts with optional category filter
 export const getAllPosts = cache(
@@ -16,7 +16,7 @@ export const getAllPosts = cache(
     const safePage = Math.max(1, page);
     const safeLimit = Math.min(Math.max(1, limit), 100);
 
-    const whereCondition: Prisma.PostWhereInput = {};
+    const whereCondition : any= {};
 
     // Add category filter
     if (categorySlug) {

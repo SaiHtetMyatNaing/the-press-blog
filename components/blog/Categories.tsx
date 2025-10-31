@@ -2,7 +2,6 @@ import { getAllCategories } from "@/server/dal/categories";
 import CategoryFilter from "@/components/blog/blog-filtered";
 import { Suspense } from "react";
 import CategoryFilterSkeleton from "./blog-category-filtered-skeleton";
-import BlogSearch from "./blog-search";
 
 export default async function Categories({
   selectedCategory,
