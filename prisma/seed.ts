@@ -1,108 +1,119 @@
+// seed-clean.ts
 import { faker } from "@faker-js/faker";
-import { Prisma, PrismaClient } from "@/src/generated/client";
+import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
-// Helper function to generate a slug from title
-function generateSlug(title: string) {
+/* -------------------------------------------------
+   Slug helper – “- - - of the title”
+   ------------------------------------------------- */
+function generateSlug(title: string): string {
   return title
     .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/(^-|-$)/g, "");
+    .replace(/[^a-z0-9\s]+/g, "")   // keep letters, digits, spaces
+    .trim()
+    .replace(/\s+/g, "-");          // one dash per space
 }
 
-// Helper function to calculate reading time (based on word count)
-function calculateReadingTime(content: string) {
-  const wordsPerMinute = 200;
-  const wordCount = content.split(/\s+/).length;
-  return Math.ceil(wordCount / wordsPerMinute);
+/* -------------------------------------------------
+   Reading-time helper
+   ------------------------------------------------- */
+function calculateReadingTime(content: string): number {
+  const wpm = 200;
+  const words = content.split(/\s+/).filter(Boolean).length;
+  return Math.ceil(words / wpm);
 }
 
-const CATEGORY_COUNT = 5;
-const POST_COUNT = 50;
-
-const createSlug = (title: string) =>
-  title.toLowerCase().replace(/\s+/g, "-") +
-  "-" +
-  faker.string.uuid().slice(0, 4);
-
+/* -------------------------------------------------
+   Main
+   ------------------------------------------------- */
 async function main() {
 
-  // Create Users first
-  console.log("👤 Creating users...");
-  const users = [];
-  for (let i = 0; i < 10; i++) {
-    const user = await prisma.user.create({
-      data: {
-        name: faker.person.fullName(),
-        email: faker.internet.email(),
-        image: faker.image.avatar(),
-      },
-    });
-    users.push(user);
-    console.log(`  ✓ Created user: ${user.name}`);
-  }
 
-  // Create Categories
-  const categories = [
-    { title: "Technology" },
-    { title: "Travel" },
-    { title: "Food & Cooking" },
-    { title: "Fitness & Health" },
-    { title: "Business" },
+  /* ---------- 2. CREATE USERS ---------- */
+  console.log("Creating 10 users…");
+  const users = await Promise.all(
+    Array.from({ length: 10 }, () =>
+      prisma.user.create({
+        data: {
+          name: faker.person.fullName(),
+          email: faker.internet.email(),
+          image: faker.image.avatar(),
+        },
+      })
+    )
+  );
+  console.log(`   ${users.length} users created.\n`);
+
+  /* ---------- 3. CREATE CATEGORIES (with slug) ---------- */
+  const categoryTitles = [
+    "Technology",
+    "Travel",
+    "Food & Cooking",
+    "Fitness & Health",
+    "Business",
   ];
 
-  console.log("📁 Creating categories...");
-  const createdCategories = [];
-  for (const category of categories) {
-    const newCategory = await prisma.category.create({
-      data: category,
-    });
-    createdCategories.push(newCategory);
-    console.log(`  ✓ Created category: ${category.title}`);
-  }
+  console.log("Creating categories with slug…");
+  const categories = await Promise.all(
+    categoryTitles.map(async (title) => {
+      const slug = generateSlug(title);
+      const cat = await prisma.category.create({
+        data: { title},
+      });
+      console.log(`   ${title} → ${slug}`);
+      return cat;
+    })
+  );
+  console.log(`   ${categories.length} categories created.\n`);
 
-  // Create Posts
-  console.log("📝 Creating posts...");
-  let totalPosts = 0;
+  /* ---------- 4. CREATE POSTS ---------- */
+  console.log("Creating posts…");
+  let postCount = 0;
 
-  for (const category of createdCategories) {
-    const numberOfPosts = faker.number.int({ min: 3, max: 5 });
+  for (const cat of categories) {
+    const postsPerCat = faker.number.int({ min: 3, max: 5 });
 
-    for (let i = 0; i < numberOfPosts; i++) {
+    for (let i = 0; i < postsPerCat; i++) {
       const title = faker.lorem.sentence({ min: 5, max: 10 });
-      const content = faker.lorem.paragraphs({ min: 5, max: 10 }, `\n\n`);
-      
-      // Pick a random user as author
-      const randomUser = users[faker.number.int({ min: 0, max: users.length - 1 })];
+      const content = faker.lorem.paragraphs({ min: 5, max: 10 }, "\n\n");
+
+      const author = users[faker.number.int({ min: 0, max: users.length - 1 })];
+
+      const slug =
+        generateSlug(title) + "-" + faker.string.uuid().slice(0, 4);
 
       await prisma.post.create({
         data: {
           title,
-          slug: generateSlug(title) + "-" + faker.string.uuid().slice(0, 4), // Ensure uniqueness
+          slug,
           excerpt: faker.lorem.paragraph(),
-          content: content,
+          content,
           thumbnail: faker.image.url(),
           readingTime: calculateReadingTime(content),
-          authorId: randomUser.id, // Use actual user ID
-          categoryId: category.id,
+          authorId: author.id,
+          categoryId: cat.id,
         },
       });
-      
-      totalPosts++;
+
+      postCount++;
     }
-    console.log(`  ✓ Created ${numberOfPosts} posts for ${category.title}`);
+
+    console.log(`   ${postsPerCat} posts for "${cat.title}"`);
   }
 
-  console.log(`\n✅ Seeding completed successfully!`);
-  console.log(`   - ${users.length} users created`);
-  console.log(`   - ${createdCategories.length} categories created`);
-  console.log(`   - ${totalPosts} posts created`);
+  console.log("\nSeeding finished!");
+  console.log(`   Users:      ${users.length}`);
+  console.log(`   Categories: ${categories.length}`);
+  console.log(`   Posts:      ${postCount}`);
 }
 
+/* -------------------------------------------------
+   Run
+   ------------------------------------------------- */
 main()
   .catch((e) => {
-    console.error('❌ Error seeding database:');
+    console.error("Seeding failed:");
     console.error(e);
     process.exit(1);
   })

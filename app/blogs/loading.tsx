@@ -10,8 +10,8 @@ const loading = () => {
             </h1>
             <div className="w-16 h-1 bg-primary rounded-full" />
           </header>
-          <PostGridSkeleton/>
           <CategoryFilterSkeleton/>
+          <PostGridSkeleton/>
         </div>
   )
 }

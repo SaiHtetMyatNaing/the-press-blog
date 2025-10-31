@@ -11,13 +11,13 @@ import { getPostById, getPostCountByAuthorId } from "@/server/dal/posts";
 export default async function ArticlePage({
   params,
 }: {
-  params: Promise<{ id: string }>;
+  params: Promise<{ slug: string }>;
 }) {
   // Await the params since they're now a Promise in Next.js 15
-  const { id } = await params;
+  const { slug } = await params;
 
   // Find the article directly on the server
-  const article = await getPostById(id);
+  const article = await getPostById(slug);
   const postCount = await getPostCountByAuthorId(article.authorId);
   // If article not found, trigger 404
   if (!article) {
@@ -35,7 +35,7 @@ export default async function ArticlePage({
       {/* Back to All Blogs Navigation */}
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pt-8">
         <Link
-          href="/"
+          href="/blogs"
           className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
         >
           <svg

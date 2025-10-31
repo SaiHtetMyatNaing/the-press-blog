@@ -6,7 +6,7 @@ import {PostPreview } from "@/server/types/posts"
 
 export default function PostCard({ post }: { post: PostPreview }) {
   return (
-    <Link href={`/article/${post.id}`}>
+    <Link href={`/article/${post.slug}`}>
       <article className="group h-full flex flex-col bg-card rounded-sm overflow-hidden hover:shadow-lg transition-shadow duration-300 cursor-pointer">
         {/* Image Container */}
         <div className="relative overflow-hidden bg-muted h-48 sm:h-56 md:h-64">
