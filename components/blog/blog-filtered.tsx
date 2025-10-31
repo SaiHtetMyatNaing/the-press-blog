@@ -10,7 +10,7 @@ import { useTransition } from "react";
 import { useState } from "react";
 
 export default function CategoryFilter({
-  selectedCategory,
+  selectedCategory, // ← This is now the SLUG from URL
   categories,
 }: {
   selectedCategory?: string;
@@ -22,18 +22,22 @@ export default function CategoryFilter({
   const [isPending, startTransition] = useTransition();
   const [pendingCategory, setPendingCategory] = useState<string | null>(null);
 
-  const buildHref = (cat?: string) => {
+  // Build URL with category slug
+  const buildHref = (catSlug?: string) => {
     const params = new URLSearchParams(searchParams.toString());
-    if (cat) params.set("category", cat);
-    else params.delete("category");
-    return `/blogs?${params.toString().toLowerCase()}`;
+    if (catSlug) {
+      params.set("category", catSlug);
+    } else {
+      params.delete("category");
+    }
+    return `/blogs?${params.toString()}`;
   };
 
-  const handleClick = (cat?: string) => {
-    const target = cat ?? "";
+  const handleClick = (catSlug?: string) => {
+    const target = catSlug ?? "";
     setPendingCategory(target);
     startTransition(() => {
-      router.push(buildHref(cat));
+      router.push(buildHref(catSlug));
     });
   };
 
@@ -42,7 +46,7 @@ export default function CategoryFilter({
 
   const Spinner = () => (
     <svg
-      className="animate-spin h-3 w-3 text-current"
+      className="animate-spin h-3 w-3 text-current ml-1"
       xmlns="http://www.w3.org/2000/svg"
       fill="none"
       viewBox="0 0 24 24"
@@ -77,7 +81,7 @@ export default function CategoryFilter({
         >
           <Button
             variant={!selectedCategory ? "default" : "secondary"}
-            className={cn(clickScale, "cursor-pointer flex items-center gap-2")}
+            className={cn(clickScale, "flex items-center gap-1.5")}
             disabled={isPending}
           >
             All
@@ -102,7 +106,7 @@ export default function CategoryFilter({
             >
               <Button
                 variant={isActive ? "default" : "secondary"}
-                className={cn(clickScale, "cursor-pointer flex items-center gap-2")}
+                className={cn(clickScale, "flex items-center gap-1.5")}
                 disabled={isPending}
               >
                 {category.title}
