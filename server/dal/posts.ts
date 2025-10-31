@@ -4,7 +4,7 @@ import { prisma } from "../db/prisma";
 import { Post } from "../types/posts";
 import { Prisma } from "@prisma/client";
 
- // Unified function to get all posts with optional category filter
+// Unified function to get all posts with optional category filter
 export const getAllPosts = cache(
   async (
     categorySlug?: string,
@@ -16,15 +16,15 @@ export const getAllPosts = cache(
     const safePage = Math.max(1, page);
     const safeLimit = Math.min(Math.max(1, limit), 100);
 
-    const whereCondition : any= {};
+    const whereCondition: any = {};
 
     // Add category filter
     if (categorySlug) {
-      whereCondition.category = { 
+      whereCondition.category = {
         title: {
           equals: categorySlug,
-          mode: "insensitive"
-        }
+          mode: "insensitive",
+        },
       };
     }
 
@@ -45,9 +45,22 @@ export const getAllPosts = cache(
           where: whereCondition,
           skip,
           take: safeLimit,
-          include: {
-            author : true,
+          select: {
+            id: true,
+            title: true,
+            slug: true,
+            excerpt: true,
+            createdAt: true,
+            updatedAt: true,
+            thumbnail: true,
+            author: {
+              select: {
+                id: true,
+                name: true,
+              },
+            },
             category: {
+              // you had this in include before — add it back if needed
               select: {
                 id: true,
                 title: true,
@@ -55,6 +68,7 @@ export const getAllPosts = cache(
             },
           },
           orderBy: {
+            // This is CORRECT — top-level
             createdAt: "desc",
           },
         }),
@@ -114,10 +128,9 @@ export async function getPostCountByAuthorId(
   });
 }
 
-export async function getPostCount(){
-   return await prisma.post.count()
+export async function getPostCount() {
+  return await prisma.post.count();
 }
-
 
 //get related post by Category id
 export async function getRelatedPosts(
