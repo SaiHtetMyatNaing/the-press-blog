@@ -1,7 +1,6 @@
 import { getAllPostsResult, Post } from "@/server/types/posts";
 import PostCard from "./blog-card";
 import Link from "next/link";
-import BlogSearch from "./blog-search";
 
 export default async function PostGrid({
   displayPosts,

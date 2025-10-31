@@ -1,4 +1,4 @@
-// Categories.tsx - server component
+"use client"
 import { getAllCategories } from "@/server/dal/categories";
 import CategoryFilter from "@/components/blog/blog-filtered";
 import { Suspense } from "react";
