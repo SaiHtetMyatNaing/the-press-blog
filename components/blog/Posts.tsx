@@ -1,4 +1,3 @@
-'use client'
 import { getAllPosts } from "@/server/dal/posts";
 import PostGrid from "@/components/blog/blog-grid";
 import { Suspense } from "react";
