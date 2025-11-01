@@ -1,7 +1,6 @@
 import Categories from "@/components/blog/Categories";
 import Posts from "@/components/blog/Posts";
 
-export const revalidate = 60;
 
 export default async function PostsPage({
   searchParams,

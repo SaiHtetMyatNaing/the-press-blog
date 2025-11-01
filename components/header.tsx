@@ -3,189 +3,177 @@
 import { useState } from "react"
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
-import { Menu, X, LogOut, User } from "lucide-react"
-import { useAuth } from "@/lib/auth-context"
+import { Menu, Search, LogOut, User } from "lucide-react"
+
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
+import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 
 export default function Header() {
-  const [isMenuOpen, setIsMenuOpen] = useState(false)
-  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false)
-  const { user, logout } = useAuth()
+  const [mobileSearch, setMobileSearch] = useState("")
   const router = useRouter()
   const pathname = usePathname()
 
+  const user = null // Set to true/object to test
+
   const handleLogout = () => {
-    logout()
-    setIsUserMenuOpen(false)
     router.push("/")
   }
 
-  /* ---------- Desktop: Active = primary + bold (no underline) ---------- */
-  const desktopLink = (href: string) => {
-    const active = pathname === href
-    return `
-      text-sm font-medium transition-colors
-      ${active 
-        ? "text-primary font-bold" 
-        : "text-foreground hover:text-primary"
-      }
-    `.trim().replace(/\s+/g, " ")
-  }
-
-  /* ---------- Mobile: Active = primary + bold + light bg (no underline) ---------- */
-  const mobileLink = (href: string) => {
-    const active = pathname === href
-    return `
-      block px-4 py-2 text-sm font-medium rounded-sm transition-colors
-      ${active 
-        ? "text-primary font-bold bg-secondary/30" 
-        : "text-foreground hover:bg-secondary"
-      }
-    `.trim().replace(/\s+/g, " ")
-  }
+  const navItems = [
+    { href: "/", label: "Home" },
+    { href: "/blogs", label: "Blogs" },
+   { href: "/profile", label: "Profile" },
+  ].filter(Boolean)
 
   return (
-    <header className="sticky top-0 z-50 bg-background border-b border-border">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16">
-          {/* Logo */}
-          <Link href="/" className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-primary rounded-sm flex items-center justify-center">
-              <span className="text-primary-foreground font-serif font-bold text-lg">03</span>
-            </div>
-            <span className="hidden sm:inline font-serif text-lg font-bold text-foreground">
-              The Press
-            </span>
-          </Link>
+    <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur [backdrop-filter]:bg-background/60">
+      <div className="flex h-16 items-center justify-between px-4 sm:px-6 lg:px-8">
+        {/* LEFT: Logo */}
+        <Link href="/" className="flex items-center gap-2">
+          <div className="flex h-8 w-8 items-center justify-center rounded-sm bg-primary">
+            <span className="font-serif text-lg font-bold text-primary-foreground">03</span>
+          </div>
+          <span className="hidden font-serif text-lg font-bold sm:inline-block">
+            The Press
+          </span>
+        </Link>
 
+        {/* RIGHT: Nav + Auth */}
+        <div className="flex items-center gap-6">
           {/* Desktop Nav */}
-          <nav className="hidden md:flex items-center gap-8">
-            <Link href="/" className={desktopLink("/")}>
-              Home
-            </Link>
-            <Link href="/blogs" className={desktopLink("/blogs")}>
-              Blogs
-            </Link>
-            {user && (
-              <Link href="/profile" className={desktopLink("/profile")}>
-                Profile
+          <nav className="hidden items-center gap-6 md:flex">
+            {navItems.map((item) => (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={`text-sm font-medium transition-colors ${
+                  pathname === item.href
+                    ? "text-primary font-bold"
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                {item.label}
               </Link>
-            )}
+            ))}
+          </nav>
 
-            {/* User Menu */}
+          {/* Desktop Auth */}
+          <div className="hidden items-center gap-2 md:flex">
             {user ? (
-              <div className="relative">
-                <button
-                  onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
-                  className="px-3 py-2 text-sm font-medium text-foreground hover:bg-secondary rounded-sm transition-colors"
-                >
-                  {user.name}
-                </button>
-                {isUserMenuOpen && (
-                  <div className="absolute right-0 mt-2 w-48 bg-background border border-border rounded-sm shadow-lg z-50">
-                    <Link
-                      href="/profile"
-                      className="flex items-center gap-2 px-4 py-2 text-sm text-foreground hover:bg-secondary transition-colors"
-                    >
-                      <User className="w-4 h-4" />
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="sm" className="gap-2">
+                    <Avatar className="h-6 w-6">
+                      <AvatarFallback>U</AvatarFallback>
+                    </Avatar>
+                    <span className="hidden sm:inline">User</span>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-48">
+                  <DropdownMenuItem asChild>
+                    <Link href="/profile" className="flex items-center gap-2">
+                      <User className="h-4 w-4" />
                       Profile
                     </Link>
-                    <button
-                      onClick={handleLogout}
-                      className="w-full flex items-center gap-2 px-4 py-2 text-sm text-foreground hover:bg-secondary transition-colors text-left"
-                    >
-                      <LogOut className="w-4 h-4" />
-                      Logout
-                    </button>
-                  </div>
-                )}
-              </div>
-            ) : (
-              <div className="flex items-center gap-2">
-                <Link
-                  href="/login"
-                  className="px-3 py-2 text-sm font-medium text-foreground hover:bg-secondary rounded-sm transition-colors"
-                >
-                  Sign In
-                </Link>
-                <Link
-                  href="/signup"
-                  className="px-3 py-2 text-sm font-medium bg-accent text-white rounded-sm hover:bg-accent/90 transition-colors"
-                >
-                  Sign Up
-                </Link>
-              </div>
-            )}
-          </nav>
-
-          {/* Mobile toggle */}
-          <button
-            onClick={() => setIsMenuOpen(!isMenuOpen)}
-            className="md:hidden p-2 hover:bg-secondary rounded-sm transition-colors"
-          >
-            {isMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-          </button>
-        </div>
-
-        {/* Mobile Menu */}
-        {isMenuOpen && (
-          <nav className="md:hidden pb-4 space-y-1">
-            <Link href="/" className={mobileLink("/")}>
-              Home
-            </Link>
-            <Link href="/blogs" className={mobileLink("/blogs")}>
-              Blogs
-            </Link>
-            {user && (
-              <Link href="/profile" className={mobileLink("/profile")}>
-                Profile
-              </Link>
-            )}
-
-            {/* Mobile Search */}
-            <div className="px-4 pt-2">
-              <input
-                type="text"
-                placeholder="Search articles..."
-                className="w-full px-4 py-2 bg-secondary text-foreground placeholder-muted-foreground rounded-sm text-sm focus:outline-none focus:ring-2 focus:ring-primary"
-              />
-            </div>
-
-            {/* Mobile Auth */}
-            <div className="px-4 pt-4 border-t border-border space-y-2">
-              {user ? (
-                <>
-                  <Link
-                    href="/profile"
-                    className="block px-4 py-2 text-sm font-medium text-foreground hover:bg-secondary rounded-sm"
-                  >
-                    Profile
-                  </Link>
-                  <button
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
                     onClick={handleLogout}
-                    className="w-full text-left px-4 py-2 text-sm font-medium text-foreground hover:bg-secondary rounded-sm"
+                    className="flex items-center gap-2 text-red-600 focus:text-red-600"
                   >
+                    <LogOut className="h-4 w-4" />
                     Logout
-                  </button>
-                </>
-              ) : (
-                <>
-                  <Link
-                    href="/login"
-                    className="block px-4 py-2 text-sm font-medium text-foreground hover:bg-secondary rounded-sm"
-                  >
-                    Sign In
-                  </Link>
-                  <Link
-                    href="/signup"
-                    className="block px-4 py-2 text-sm font-medium bg-accent text-white rounded-sm hover:bg-accent/90"
-                  >
-                    Sign Up
-                  </Link>
-                </>
-              )}
-            </div>
-          </nav>
-        )}
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ) : (
+              <>
+                <Button variant="ghost" size="sm" asChild>
+                  <Link href="/login">Sign In</Link>
+                </Button>
+                <Button size="sm" asChild>
+                  <Link href="/signup">Sign Up</Link>
+                </Button>
+              </>
+            )}
+          </div>
+
+          {/* Mobile Menu */}
+          <Sheet>
+            <SheetTrigger asChild>
+              <Button variant="ghost" size="icon" className="md:hidden">
+                <Menu className="h-5 w-5" />
+                <span className="sr-only">Toggle menu</span>
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="right" className="w-80">
+              <div className="flex flex-col gap-6 pt-6">
+                <nav className="flex flex-col gap-1">
+                  {navItems.map((item) => (
+                    <Link
+                      key={item.href}
+                      href={item.href}
+                      className={`rounded-sm px-3 py-2 text-sm font-medium transition-colors ${
+                        pathname === item.href
+                          ? "bg-secondary/30 text-primary font-bold"
+                          : "text-foreground hover:bg-secondary"
+                      }`}
+                    >
+                      {item.label}
+                    </Link>
+                  ))}
+                </nav>
+
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                  <Input
+                    placeholder="Search articles..."
+                    value={mobileSearch}
+                    onChange={(e) => setMobileSearch(e.target.value)}
+                    className="pl-10"
+                  />
+                </div>
+
+                <div className="border-t pt-4">
+                  {user ? (
+                    <div className="space-y-1">
+                      <Button variant="ghost" className="w-full justify-start" asChild>
+                        <Link href="/profile">
+                          <User className="mr-2 h-4 w-4" />
+                          Profile
+                        </Link>
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        className="w-full justify-start text-red-600"
+                        onClick={handleLogout}
+                      >
+                        <LogOut className="mr-2 h-4 w-4" />
+                        Logout
+                      </Button>
+                    </div>
+                  ) : (
+                    <div className="space-y-2">
+                      <Button variant="ghost" className="w-full" asChild>
+                        <Link href="/login">Sign In</Link>
+                      </Button>
+                      <Button className="w-full" asChild>
+                        <Link href="/signup">Sign Up</Link>
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </SheetContent>
+          </Sheet>
+        </div>
       </div>
     </header>
   )
