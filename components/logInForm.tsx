@@ -15,8 +15,8 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { useRouter } from "next/navigation";
-import { useToast } from "@/components/ui/use-toast";
 import { signIn } from "@/lib/auth-client";
+import { toast } from "sonner";
 
 const loginSchema = z.object({
   email: z.string().email("Invalid email address"),
@@ -27,7 +27,6 @@ export type LoginFormData = z.infer<typeof loginSchema>;
 
 export function LoginForm() {
   const router = useRouter();
-  const { toast } = useToast();
 
   const form = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
@@ -37,37 +36,27 @@ export function LoginForm() {
     },
   });
 
- const onSubmit = async (data: LoginFormData) => {
-  try {
-    const { error } = await signIn.email({
-      email: data.email,  
-      password: data.password,
-      callbackURL: "/blogs",
-    });
-
-    if (error) {
-      toast({
-        variant: "destructive",
-        description: error.message || "Login failed—check your credentials.",
+  const onSubmit = async (data: LoginFormData) => {
+    try {
+      const { error } = await signIn.email({
+        email: data.email,
+        password: data.password,
+        callbackURL: "/blogs",
       });
-      return;
+
+      if (error) {
+        toast.error(error.message || "Login failed—check your credentials.");
+        return;
+      }
+
+      toast.success("Successfully Signed In");
+
+      form.reset();
+      router.push("/blogs");
+    } catch (err) {
+      toast.error("An unexpected error occurred. Please try again.");
     }
-
-    toast({
-      variant: "default",
-      description: "Successfully Signed In",
-    });
-
-    form.reset();
-    router.push("/blogs"); 
-  } catch (err) {
-
-    toast({
-      variant: "destructive",
-      description: "An unexpected error occurred. Please try again.",
-    });
-  }
-};
+  };
 
   return (
     <Card className="w-full max-w-md min-h-[500px] flex flex-col">
@@ -110,7 +99,7 @@ export function LoginForm() {
 
             <Button
               type="submit"
-              className="w-full h-12 text-base cursor-pointer"
+              className="w-full h-12 text-base cursor-p"
               disabled={form.formState.isSubmitting}
             >
               {form.formState.isSubmitting ? "Signing in..." : "Sign In"}

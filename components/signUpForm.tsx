@@ -15,11 +15,10 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { useRouter } from "next/navigation";
-import { useToast } from "@/components/ui/use-toast";
 import { Loader2 } from "lucide-react"; // Add this for spinner; npm i lucide-react
-import { useState } from "react";
-import { auth } from "@/auth";
-import { signIn, signUp } from "@/lib/auth-client"; // Adjust to signUp if available
+
+import { signUp } from "@/lib/auth-client"; // Adjust to signUp if available
+import { toast } from "sonner";
 
 const signUpSchema = z
   .object({
@@ -37,7 +36,6 @@ export type SignUpFormData = z.infer<typeof signUpSchema>;
 
 export function SignUpForm() {
   const router = useRouter();
-  const { toast } = useToast();
 
   const form = useForm<SignUpFormData>({
     resolver: zodResolver(signUpSchema),
@@ -60,24 +58,16 @@ export function SignUpForm() {
       });
 
       if (error) {
-        toast({
-          variant: "destructive",
-          description: error.message || "Something went wrong",
-        });
+        toast.error(error.message || "Something went wrong");
         return;
       }
 
       // Success
-      toast({
-        description: "Sign Up Successful!",
-      });
+      toast.success("Sign Up Successful!");
       form.reset(); // Clear form
       router.push("/blogs");
     } catch (err) {
-      toast({
-        variant: "destructive",
-        description: "An unexpected error occurred. Please try again.",
-      });
+      toast.error("An unexpected error occurred. Please try again.");
     }
   };
 
