@@ -1,190 +1,165 @@
 "use client"
 
-import type React from "react"
-
-import { useEffect, useState } from "react"
-import { useRouter } from "next/navigation"
-import { useAuth } from "@/lib/auth-context"
 import Link from "next/link"
+import { ArrowLeft } from "lucide-react"
+
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Textarea } from "@/components/ui/textarea"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card"
 
 const CATEGORIES = ["Tech", "Finance", "Lifestyle", "Other"]
 
+// Optional: Custom animated button (or enhance shadcn Button)
+const AnimatedButton = ({
+  children,
+  ...props
+}: React.ComponentProps<typeof Button>) => {
+  return (
+    <Button
+      className="transform-gpu transition-all duration-150 ease-out active:scale-95 hover:scale-105 cursor-pointer"
+      {...props}
+    >
+      {children}
+    </Button>
+  )
+}
+
 export default function CreatePostPage() {
-  const { user, isLoading } = useAuth()
-  const router = useRouter()
-
-  const [formData, setFormData] = useState({
-    title: "",
-    excerpt: "",
-    content: "",
-    category: "Tech",
-    thumbnail: "/blog-article.jpg",
-    readingTime: 5,
-  })
-
-  const [isSubmitting, setIsSubmitting] = useState(false)
-
-  useEffect(() => {
-    if (!isLoading && !user) {
-      router.push("/login")
-    }
-  }, [user, isLoading, router])
-
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <p className="text-muted-foreground">Loading...</p>
-      </div>
-    )
-  }
-
-  if (!user) {
-    return null
-  }
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    const { name, value } = e.target
-    setFormData((prev) => ({
-      ...prev,
-      [name]: name === "readingTime" ? Number.parseInt(value) : value,
-    }))
-  }
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsSubmitting(true)
-
-    try {
-      console.log("Creating post:", formData)
-      router.push("/profile")
-    } catch (error) {
-      console.error("Error creating post:", error)
-    } finally {
-      setIsSubmitting(false)
-    }
-  }
-
   return (
     <div className="min-h-screen bg-background">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-
-        {/* Form */}
-        <form onSubmit={handleSubmit} className="bg-white border border-border rounded-lg p-8 space-y-6">
-          <div>
-            <label htmlFor="title" className="block text-sm font-semibold text-foreground mb-2">
-              Article Title
-            </label>
-            <input
-              id="title"
-              name="title"
-              type="text"
-              value={formData.title}
-              onChange={handleChange}
-              required
-              className="w-full px-4 py-3 border border-border rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-accent"
-              placeholder="Enter article title"
-            />
-          </div>
-
-          <div>
-            <label htmlFor="category" className="block text-sm font-semibold text-foreground mb-2">
-              Category
-            </label>
-            <select
-              id="category"
-              name="category"
-              value={formData.category}
-              onChange={handleChange}
-              className="w-full px-4 py-3 border border-border rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-accent"
-            >
-              {CATEGORIES.map((cat) => (
-                <option key={cat} value={cat}>
-                  {cat}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div>
-            <label htmlFor="excerpt" className="block text-sm font-semibold text-foreground mb-2">
-              Excerpt
-            </label>
-            <textarea
-              id="excerpt"
-              name="excerpt"
-              value={formData.excerpt}
-              onChange={handleChange}
-              required
-              rows={3}
-              className="w-full px-4 py-3 border border-border rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-accent resize-none"
-              placeholder="Brief summary of your article"
-            />
-          </div>
-
-          <div>
-            <label htmlFor="content" className="block text-sm font-semibold text-foreground mb-2">
-              Article Content
-            </label>
-            <textarea
-              id="content"
-              name="content"
-              value={formData.content}
-              onChange={handleChange}
-              required
-              rows={12}
-              className="w-full px-4 py-3 border border-border rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-accent resize-none font-mono text-sm"
-              placeholder="Write your article content here..."
-            />
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-            <div>
-              <label htmlFor="readingTime" className="block text-sm font-semibold text-foreground mb-2">
-                Reading Time (minutes)
-              </label>
-              <input
-                id="readingTime"
-                name="readingTime"
-                type="number"
-                min="1"
-                value={formData.readingTime}
-                onChange={handleChange}
-                className="w-full px-4 py-3 border border-border rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-accent"
-              />
-            </div>
-
-            <div>
-              <label htmlFor="thumbnail" className="block text-sm font-semibold text-foreground mb-2">
-                Thumbnail URL
-              </label>
-              <input
-                id="thumbnail"
-                name="thumbnail"
-                type="text"
-                value={formData.thumbnail}
-                onChange={handleChange}
-                className="w-full px-4 py-3 border border-border rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-accent"
-                placeholder="Image URL"
-              />
-            </div>
-          </div>
-
-          <div className="flex flex-col sm:flex-row gap-4 pt-6">
-            <button
-              type="submit"
-              disabled={isSubmitting}
-              className="flex-1 px-6 py-3 bg-accent text-white rounded-lg hover:bg-accent/90 transition-colors font-medium disabled:opacity-50"
-            >
-              {isSubmitting ? "Publishing..." : "Publish Article"}
-            </button>
-            <Link
-              href="/profile"
-              className="flex-1 px-6 py-3 border border-border text-foreground rounded-lg hover:bg-secondary transition-colors font-medium text-center"
-            >
-              Cancel
+      {/* Top Navigation */}
+      <div className="border-b bg-background">
+        <div className="container max-w-3xl mx-auto px-4 py-4">
+          <Button asChild variant="ghost" size="sm" className="cursor-pointer">
+            <Link href="/profile">
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Back to Profile
             </Link>
-          </div>
-        </form>
+          </Button>
+        </div>
+      </div>
+
+      <div className="container max-w-3xl mx-auto px-4 py-8 sm:py-12">
+        <Card>
+          <CardHeader className="pb-6">
+            <CardTitle className="text-2xl font-bold">Create New Article</CardTitle>
+            <CardDescription>
+              Fill in the details and publish your article.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <form className="space-y-5">
+              {/* Title */}
+              <div className="space-y-2">
+                <Label htmlFor="title">Article Title</Label>
+                <Input
+                  id="title"
+                  name="title"
+                  type="text"
+                  required
+                  placeholder="Enter article title"
+                />
+              </div>
+
+              {/* Category */}
+              <div className="space-y-2">
+                <Label htmlFor="category">Category</Label>
+                <Select name="category" defaultValue="Tech">
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select a category" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {CATEGORIES.map((cat) => (
+                      <SelectItem key={cat} value={cat}>
+                        {cat}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Excerpt */}
+              <div className="space-y-2">
+                <Label htmlFor="excerpt">Excerpt</Label>
+                <Textarea
+                  id="excerpt"
+                  name="excerpt"
+                  required
+                  rows={3}
+                  placeholder="Brief summary of your article"
+                  className="resize-none"
+                />
+              </div>
+
+              {/* Content */}
+              <div className="space-y-2">
+                <Label htmlFor="content">Article Content</Label>
+                <Textarea
+                  id="content"
+                  name="content"
+                  required
+                  rows={10}
+                  placeholder="Write your article content here..."
+                  className="resize-none font-mono text-sm"
+                />
+              </div>
+
+              {/* Reading Time & Thumbnail */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                <div className="space-y-2">
+                  <Label htmlFor="readingTime">Reading Time (min)</Label>
+                  <Input
+                    id="readingTime"
+                    name="readingTime"
+                    type="number"
+                    min="1"
+                    defaultValue={5}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="thumbnail">Thumbnail URL</Label>
+                  <Input
+                    id="thumbnail"
+                    name="thumbnail"
+                    type="text"
+                    defaultValue="/blog-article.jpg"
+                    placeholder="https://..."
+                  />
+                </div>
+              </div>
+
+              {/* Animated Action Buttons */}
+              <div className="flex flex-col sm:flex-row gap-3 pt-3">
+                <AnimatedButton type="submit" className="flex-1">
+                  Publish Article
+                </AnimatedButton>
+                <AnimatedButton
+                  type="button"
+                  variant="outline"
+                  asChild
+                  className="flex-1"
+                >
+                  <Link href="/profile">Cancel</Link>
+                </AnimatedButton>
+              </div>
+            </form>
+          </CardContent>
+        </Card>
       </div>
     </div>
   )

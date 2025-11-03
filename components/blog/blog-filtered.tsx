@@ -8,6 +8,7 @@ import BlogSearch from "./blog-search";
 import { cn } from "@/lib/utils";
 import { useTransition } from "react";
 import { useState } from "react";
+import { Spinner } from "../spinner";
 
 export default function CategoryFilter({
   selectedCategory, // ← This is now the SLUG from URL
@@ -33,6 +34,8 @@ export default function CategoryFilter({
     return `/blogs?${params.toString()}`;
   };
 
+
+  //to handle the loading stage
   const handleClick = (catSlug?: string) => {
     const target = catSlug ?? "";
     setPendingCategory(target);
@@ -44,29 +47,6 @@ export default function CategoryFilter({
   const clickScale =
     "transition-all duration-75 active:scale-95 hover:scale-[1.02]";
 
-  const Spinner = () => (
-    <svg
-      className="animate-spin h-3 w-3 text-current ml-1"
-      xmlns="http://www.w3.org/2000/svg"
-      fill="none"
-      viewBox="0 0 24 24"
-    >
-      <circle
-        className="opacity-25"
-        cx="12"
-        cy="12"
-        r="10"
-        stroke="currentColor"
-        strokeWidth="4"
-      />
-      <path
-        className="opacity-75"
-        fill="currentColor"
-        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
-      />
-    </svg>
-  );
-
   return (
     <div className="flex justify-between items-center">
       <div className="flex flex-wrap gap-2">
@@ -74,7 +54,7 @@ export default function CategoryFilter({
         <Link
           href={buildHref()}
           onClick={(e) => {
-            e.preventDefault();
+            e.preventDefault()
             handleClick();
           }}
           replace={pathname === "/blogs"}
@@ -99,7 +79,7 @@ export default function CategoryFilter({
               key={category.id}
               href={buildHref(category.title)}
               onClick={(e) => {
-                e.preventDefault();
+                e.preventDefault()
                 handleClick(category.title);
               }}
               replace={pathname === "/blogs"}

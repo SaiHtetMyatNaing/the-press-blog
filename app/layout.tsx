@@ -2,10 +2,10 @@ import type React from "react"
 import type { Metadata } from "next"
 import { Inter, Lora } from "next/font/google"
 import { Analytics } from "@vercel/analytics/next"
-import { AuthProvider } from "@/lib/auth-context"
 import "./globals.css"
 import Header from "@/components/header"
 import Footer from "@/components/footer"
+import { NuqsAdapter } from 'nuqs/adapters/next/app'
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-sans" })
 const lora = Lora({ subsets: ["latin"], variable: "--font-serif" })
@@ -24,11 +24,11 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${inter.variable} ${lora.variable} font-sans antialiased`}>
-        <AuthProvider>
+        <NuqsAdapter>
           <Header/>
           {children}
           <Footer/>
-          </AuthProvider>
+          </NuqsAdapter>
         <Analytics />
       </body>
     </html>

@@ -4,7 +4,6 @@ import type React from "react"
 
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
-import { useAuth } from "@/lib/auth-context"
 import { ArrowLeft } from "lucide-react"
 import Link from "next/link"
 
@@ -26,9 +25,9 @@ const SAMPLE_POSTS = [
 ]
 
 export default function EditPostPage({ params }: { params: { id: string } }) {
-  const { user, isLoading } = useAuth()
   const router = useRouter()
-
+  const user = true;
+  const isLoading = false;
   const [formData, setFormData] = useState({
     title: "",
     excerpt: "",
@@ -48,7 +47,7 @@ export default function EditPostPage({ params }: { params: { id: string } }) {
     }
 
     const post = SAMPLE_POSTS.find((p) => p.id === params.id)
-    if (post && post.authorId === user?.id) {
+    if (post && post.authorId === "cmhewfszu0000tyt4vjrivzwl") {
       setFormData({
         title: post.title,
         excerpt: post.excerpt,
@@ -57,7 +56,7 @@ export default function EditPostPage({ params }: { params: { id: string } }) {
         thumbnail: post.thumbnail,
         readingTime: post.readingTime,
       })
-    } else if (post && post.authorId !== user?.id) {
+    } else if (post && post.authorId !== "cmhewfszu0000tyt4vjrivzwl") {
       setError("You don't have permission to edit this post")
     }
   }, [user, isLoading, params.id, router])
