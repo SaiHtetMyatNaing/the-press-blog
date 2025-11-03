@@ -1,91 +1,123 @@
 "use client";
 
-import { useState } from "react";
-import { signIn } from "@/lib/auth-client";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Alert, AlertDescription } from "@/components/ui/alert";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 import { useRouter } from "next/navigation";
+import { useToast } from "@/components/ui/use-toast";
+import { signIn } from "@/lib/auth-client";
+
+const loginSchema = z.object({
+  email: z.string().email("Invalid email address"),
+  password: z.string().min(1, "Password is required"),
+});
+
+export type LoginFormData = z.infer<typeof loginSchema>;
 
 export function LoginForm() {
-  const [error, setError] = useState<string | undefined>("");
-  const [loading, setLoading] = useState(false);
   const router = useRouter();
+  const { toast } = useToast();
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setError("");
-    setLoading(true);
+  const form = useForm<LoginFormData>({
+    resolver: zodResolver(loginSchema),
+    defaultValues: {
+      email: "",
+      password: "",
+    },
+  });
 
-    const formData = new FormData(e.currentTarget);
-    const email = formData.get("email") as string;
-    const password = formData.get("password") as string;
+ const onSubmit = async (data: LoginFormData) => {
+  try {
+    const { error } = await signIn.email({
+      email: data.email,  
+      password: data.password,
+      callbackURL: "/blogs",
+    });
 
-    try {
-      const result = await signIn.email({
-        email,
-        password,
-        callbackURL : "/"
+    if (error) {
+      toast({
+        variant: "destructive",
+        description: error.message || "Login failed—check your credentials.",
       });
-
-      if (result.error) {
-        setError(result.error.message);
-      } else {
-        // Success - manually redirect
-        router.push("/dashboard");
-        router.refresh(); // Refresh server components
-      }
-    } catch (error) {
-      setError("Email Or Password incorrect");
-    } finally {
-      setLoading(false);
+      return;
     }
-  };
+
+    toast({
+      variant: "default",
+      description: "Successfully Signed In",
+    });
+
+    form.reset();
+    router.push("/blogs"); 
+  } catch (err) {
+
+    toast({
+      variant: "destructive",
+      description: "An unexpected error occurred. Please try again.",
+    });
+  }
+};
 
   return (
     <Card className="w-full max-w-md min-h-[500px] flex flex-col">
       <CardHeader className="pb-0">
         <CardTitle className="text-2xl">Sign In</CardTitle>
       </CardHeader>
-      <form onSubmit={handleSubmit} className="flex-1 flex flex-col">
-        <CardContent className="space-y-6 flex-1 flex flex-col pt-6">
-          <div className="space-y-3">
-            <Label htmlFor="email" className="text-base">Email</Label>
-            <Input
-              id="email"
+      <Form {...form}>
+        <form
+          onSubmit={form.handleSubmit(onSubmit)}
+          className="flex-1 flex flex-col"
+        >
+          <CardContent className="space-y-6 flex-1 flex flex-col pt-6">
+            <FormField
+              control={form.control}
               name="email"
-              type="email"
-              required
-              disabled={loading}
-              className="h-12"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-base">Email</FormLabel>
+                  <FormControl>
+                    <Input type="email" className="h-12" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
-          </div>
-          
-          <div className="space-y-3">
-            <Label htmlFor="password" className="text-base">Password</Label>
-            <Input
-              id="password"
+
+            <FormField
+              control={form.control}
               name="password"
-              type="password"
-              required
-              disabled={loading}
-              className="h-12"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-base">Password</FormLabel>
+                  <FormControl>
+                    <Input type="password" className="h-12" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
-          </div>
 
-          <Button type="submit" className="w-full h-12 text-base" disabled={loading}>
-            {loading ? "Signing in..." : "Sign In"}
-          </Button>
-
-          {error && (
-            <Alert variant="destructive">
-              <AlertDescription>{error}</AlertDescription>
-            </Alert>
-          )}
-        </CardContent>
-      </form>
+            <Button
+              type="submit"
+              className="w-full h-12 text-base cursor-pointer"
+              disabled={form.formState.isSubmitting}
+            >
+              {form.formState.isSubmitting ? "Signing in..." : "Sign In"}
+            </Button>
+          </CardContent>
+        </form>
+      </Form>
     </Card>
   );
 }

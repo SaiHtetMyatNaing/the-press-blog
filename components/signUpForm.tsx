@@ -1,57 +1,83 @@
 "use client";
 
-import { useState } from "react";
-import { signUp } from "@/lib/auth-client";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Alert, AlertDescription } from "@/components/ui/alert";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 import { useRouter } from "next/navigation";
+import { useToast } from "@/components/ui/use-toast";
+import { Loader2 } from "lucide-react"; // Add this for spinner; npm i lucide-react
+import { useState } from "react";
+import { auth } from "@/auth";
+import { signIn, signUp } from "@/lib/auth-client"; // Adjust to signUp if available
+
+const signUpSchema = z
+  .object({
+    name: z.string().min(1, "Name is required"),
+    email: z.string().email("Invalid email address"),
+    password: z.string().min(8, "Password must be at least 8 characters"),
+    confirmPassword: z.string(),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "Passwords do not match",
+    path: ["confirmPassword"],
+  });
+
+export type SignUpFormData = z.infer<typeof signUpSchema>;
 
 export function SignUpForm() {
-  const [error, setError] = useState<string | undefined>("");
-  const [loading, setLoading] = useState(false);
   const router = useRouter();
+  const { toast } = useToast();
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setError("");
-    setLoading(true);
+  const form = useForm<SignUpFormData>({
+    resolver: zodResolver(signUpSchema),
+    defaultValues: {
+      name: "",
+      email: "",
+      password: "",
+      confirmPassword: "",
+    },
+  });
 
-    const formData = new FormData(e.currentTarget);
-    const name = formData.get("name") as string;
-    const email = formData.get("email") as string;
-    const password = formData.get("password") as string;
-    const confirmPassword = formData.get("confirmPassword") as string;
-
-    // Validate passwords match
-    if (password !== confirmPassword) {
-      setError("Passwords do not match");
-      setLoading(false);
-      return;
-    }
-
+  const onSubmit = async (signUpData: SignUpFormData) => {
     try {
-      const result = await signUp.email({
-        email,
-        password,
-        name,
-        callbackURL : "/"
-
+      // Assuming your auth lib supports name; otherwise, handle post-signup
+      const { error } = await signUp.email({
+        name: signUpData.name,
+        email: signUpData.email,
+        password: signUpData.password,
+        callbackURL: "/blogs",
       });
 
-      if (result.error) {
-        setError(result.error.message);
-      } else {
-        // Success - redirect to dashboard or login
-        router.push("/dashboard");
-        router.refresh();
+      if (error) {
+        toast({
+          variant: "destructive",
+          description: error.message || "Something went wrong",
+        });
+        return;
       }
-    } catch (error) {
-      setError("An error occurred during sign up");
-    } finally {
-      setLoading(false);
+
+      // Success
+      toast({
+        description: "Sign Up Successful!",
+      });
+      form.reset(); // Clear form
+      router.push("/blogs");
+    } catch (err) {
+      toast({
+        variant: "destructive",
+        description: "An unexpected error occurred. Please try again.",
+      });
     }
   };
 
@@ -60,67 +86,85 @@ export function SignUpForm() {
       <CardHeader className="pb-0">
         <CardTitle className="text-2xl">Sign Up</CardTitle>
       </CardHeader>
-      <form onSubmit={handleSubmit} className="flex-1 flex flex-col">
-        <CardContent className="space-y-6 flex-1 flex flex-col pt-6">
-          <div className="space-y-3">
-            <Label htmlFor="name" className="text-base">Name</Label>
-            <Input
-              id="name"
+      <Form {...form}>
+        <form
+          onSubmit={form.handleSubmit(onSubmit)}
+          className="flex-1 flex flex-col"
+        >
+          <CardContent className="space-y-6 flex-1 flex flex-col pt-6">
+            <FormField
+              control={form.control}
               name="name"
-              type="text"
-              required
-              disabled={loading}
-              className="h-12"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-base">Name</FormLabel>
+                  <FormControl>
+                    <Input className="h-12" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
-          </div>
 
-          <div className="space-y-3">
-            <Label htmlFor="email" className="text-base">Email</Label>
-            <Input
-              id="email"
+            <FormField
+              control={form.control}
               name="email"
-              type="email"
-              required
-              disabled={loading}
-              className="h-12"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-base">Email</FormLabel>
+                  <FormControl>
+                    <Input type="email" className="h-12" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
-          </div>
-          
-          <div className="space-y-3">
-            <Label htmlFor="password" className="text-base">Password</Label>
-            <Input
-              id="password"
+
+            <FormField
+              control={form.control}
               name="password"
-              type="password"
-              required
-              disabled={loading}
-              className="h-12"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-base">Password</FormLabel>
+                  <FormControl>
+                    <Input type="password" className="h-12" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
-          </div>
 
-          <div className="space-y-3">
-            <Label htmlFor="confirmPassword" className="text-base">Confirm Password</Label>
-            <Input
-              id="confirmPassword"
+            <FormField
+              control={form.control}
               name="confirmPassword"
-              type="password"
-              required
-              disabled={loading}
-              className="h-12"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-base">Confirm Password</FormLabel>
+                  <FormControl>
+                    <Input type="password" className="h-12" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
-          </div>
 
-          <Button type="submit" className="w-full h-12 text-base" disabled={loading}>
-            {loading ? "Creating account..." : "Sign Up"}
-          </Button>
-
-          {error && (
-            <Alert variant="destructive">
-              <AlertDescription>{error}</AlertDescription>
-            </Alert>
-          )}
-        </CardContent>
-      </form>
+            <Button
+              type="submit"
+              className="w-full h-12 text-base"
+              disabled={form.formState.isSubmitting}
+            >
+              {form.formState.isSubmitting ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Signing up...
+                </>
+              ) : (
+                "Sign Up"
+              )}
+            </Button>
+          </CardContent>
+        </form>
+      </Form>
     </Card>
   );
 }
