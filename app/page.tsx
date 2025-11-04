@@ -1,6 +1,6 @@
-import Posts from "@/components/blog/Posts";
-import Hero from "@/components/hero";
-import Newsletter from "@/components/newsletter";
+import Posts from "@/app/_components/blog/Posts";
+import Hero from "@/app/_components/hero";
+import Newsletter from "@/app/_components/newsletter";
 import Link from "next/link";
 
 export default async function Home() {

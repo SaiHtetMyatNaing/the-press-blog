@@ -1,0 +1,20 @@
+import { getAllPosts } from "@/server/dal/posts";
+import PostGrid from "@/app/_components/blog/blog-grid";
+
+export default async function Posts({
+  categorySlug,
+  page = 1,
+  limit = 10,
+  search
+}: {
+  categorySlug?: string;
+  page?: number;
+  limit?: number;
+  search?: string;
+}) {
+  const displayPosts = await getAllPosts(categorySlug, page, limit ,search);
+
+  return (
+      <PostGrid displayPosts={displayPosts} />
+  );
+}

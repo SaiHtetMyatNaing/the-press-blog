@@ -1,5 +1,5 @@
-import CategoryFilterSkeleton from '@/components/blog/blog-category-filtered-skeleton'
-import { PostGridSkeleton } from '@/components/blog/blog-grid-skeleton'
+import CategoryFilterSkeleton from '@/app/_components/blog/blog-category-filtered-skeleton'
+import { PostGridSkeleton } from '@/app/_components/blog/blog-grid-skeleton'
 
 const loading = () => {
   return (

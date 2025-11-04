@@ -1,5 +1,5 @@
-import Categories from "@/components/blog/Categories";
-import Posts from "@/components/blog/Posts";
+import Categories from "@/app/_components/blog/Categories";
+import Posts from "@/app/_components/blog/Posts";
 
 
 export default async function PostsPage({

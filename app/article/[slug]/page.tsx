@@ -1,11 +1,11 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import ArticleContent from "@/components/article-content";
-import TableOfContents from "@/components/table-of-contents";
-import SocialShare from "@/components/social-share";
-import AuthorBio from "@/components/author-bio";
-import RelatedPosts from "@/components/related-posts";
-import Newsletter from "@/components/newsletter";
+import ArticleContent from "@/app/_components/article-content";
+import TableOfContents from "@/app/_components/table-of-contents";
+import SocialShare from "@/app/_components/social-share";
+import AuthorBio from "@/app/_components/author-bio";
+import RelatedPosts from "@/app/_components/related-posts";
+import Newsletter from "@/app/_components/newsletter";
 import { getPostBySlug, getPostCountByAuthorId } from "@/server/dal/posts";
 
 export default async function ArticlePage({

@@ -3,10 +3,10 @@ import type { Metadata } from "next"
 import { Inter, Lora } from "next/font/google"
 import { Analytics } from "@vercel/analytics/next"
 import "./globals.css"
-import Footer from "@/components/footer"
+import Footer from "@/app/_components/footer"
 import { NuqsAdapter } from 'nuqs/adapters/next/app'
-import { Toaster } from "@/components/ui/sonner"
-import { Header } from "@/components/header"
+import { Toaster } from "@/app/_components/ui/sonner"
+import { Header } from "@/app/_components/header"
 
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-sans" })

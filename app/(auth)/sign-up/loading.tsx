@@ -1,4 +1,4 @@
-import { Spinner } from "@/components/ui/spinner";
+import { Spinner } from "@/app/_components/ui/spinner";
 import { Loader2 } from "lucide-react";
 
 export default function Loading() {
