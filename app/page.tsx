@@ -28,7 +28,7 @@ export const generateMetadata = async (): Promise<Metadata> => {
     twitter: {
       title: "Insights on Technology, Finance & Culture",
       description: "Curated insights on innovation, business, and life.",
-      images: ["/og-image.jpg"],
+      images: ["/og-image.png"],
     },
 
     alternates: {
