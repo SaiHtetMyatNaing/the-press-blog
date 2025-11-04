@@ -1,9 +1,43 @@
+// app/page.tsx
+import { Metadata } from "next";
 import Posts from "@/app/_components/blog/Posts";
 import Hero from "@/app/_components/hero";
 import Newsletter from "@/app/_components/newsletter";
 import Link from "next/link";
 
-export default async function Home() {
+// PAGE-SPECIFIC METADATA (overrides layout)
+export const generateMetadata = async (): Promise<Metadata> => {
+  return {
+    description:
+      "Thoughtfully curated articles exploring innovation, business, and modern life. Join thousands of readers discovering ideas that matter.",
+
+    openGraph: {
+      url: "/",
+      title: "Insights on Technology, Finance & Culture",
+      description: "Curated ideas on tech, finance, and culture.",
+      images: [
+        {
+          url: "/og-image.png",   
+          width: 1200,
+          height: 630,
+          alt: "The Press - Modern Editorial Blog",
+        },
+      ],
+    },
+
+    twitter: {
+      title: "Insights on Technology, Finance & Culture",
+      description: "Curated insights on innovation, business, and life.",
+      images: ["/og-image.jpg"],
+    },
+
+    alternates: {
+      canonical: "/",
+    },
+  };
+};
+
+export default function Home() {
   return (
     <main className="min-h-screen bg-background">
       <Hero />
@@ -16,11 +50,8 @@ export default async function Home() {
               Check out our latest articles and updates
             </p>
           </div>
-          <Link
-            href="/blogs"
-            className="text-primary hover:underline font-medium"
-          >
-            View all posts →
+          <Link href="/blogs" className="text-primary hover:underline font-medium">
+            View all posts
           </Link>
         </div>
         <Posts categorySlug="" page={1} limit={6} />

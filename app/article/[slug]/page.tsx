@@ -7,7 +7,44 @@ import AuthorBio from "@/app/_components/author-bio";
 import RelatedPosts from "@/app/_components/related-posts";
 import Newsletter from "@/app/_components/newsletter";
 import { getPostBySlug, getPostCountByAuthorId } from "@/server/dal/posts";
+import { Metadata } from "next";
 
+type Props = {
+  params: Promise<{ slug: string }>;
+};
+
+export const generateMetadata = async ({ params }: Props): Promise<Metadata> => {
+  const { slug } = await params;
+  const article = await getPostBySlug(slug);
+
+  if (!article) {
+    return { title: "Article Not Found" };
+  }
+
+  return {
+    title: article.title,
+    description: article.excerpt || "Read the full article on The Press.",
+    openGraph: {
+      title: article.title,
+      description: article.excerpt || "Read the full article on The Press.",
+      images: [
+        {
+          url: article.thumbnail || "/og-image.png", 
+          width: 1200,
+          height: 630,
+          alt: article.title,
+        },
+      ],
+      type: "article",
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: article.title,
+      description: article.excerpt || "Read the full article.",
+      images: [article.thumbnail || "/og-image.png"],
+    },
+  };
+};
 export default async function ArticlePage({
   params,
 }: {
