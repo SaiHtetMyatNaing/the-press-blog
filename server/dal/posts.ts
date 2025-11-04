@@ -110,14 +110,13 @@ export const getPostBySlug = cache(async (slug: string): Promise<Post | null> =>
       },
     },
   });
-
   return single_post;
 });
 
 // Counting the posts by author Id
 export async function getPostCountByAuthorId(
   authorId: string
-): Promise<number> {
+): Promise<number | null> {
   return await prisma.post.count({
     where: {
       authorId,
@@ -135,6 +134,13 @@ export const getPostByUserId = async (id: string) => {
     where: {
       authorId: id,
     },
+    include: {
+      category: {
+        select: {
+          title: true
+        }
+      }
+    }
   });
 };
 
@@ -168,7 +174,7 @@ export async function getRelatedPosts(
       category: {
         select: {
           id: true,
-          title: true, // ✅ Only category title
+          title: true,
         },
       },
     },
@@ -180,7 +186,6 @@ export async function getRelatedPosts(
 
 export async function createPost(input: CreatePostInput) {
   const validatedData = createPostSchema.parse(input);
-   console.log(validatedData)
   return await prisma.post.create({
     data: validatedData,
     include: {
@@ -196,3 +201,22 @@ export async function createPost(input: CreatePostInput) {
     },
   });
 }
+
+export async function deletePostById(id : string){
+    const deletedPost = await prisma.post.delete({
+       where : {
+         id
+       }
+    })
+  return deletedPost
+}
+
+export async function checkUserOwnThePost(id : string){
+     const post = await prisma.post.findUnique({
+      where: { id },
+      select: { authorId: true }
+    })
+
+    return post
+}
+   

@@ -6,7 +6,7 @@ import { ArrowRight } from "lucide-react"
 interface AuthorBioProps {
   authorId: string
   authorName: string
-  postCount : number
+  postCount : number | null
 }
 
 const authorImages: Record<string, string> = {

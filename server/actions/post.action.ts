@@ -1,9 +1,9 @@
 "use server"
 
 import { getServerSession } from "@/app/_lib/get-session";
-import { CreatePostFormInput, createPostFormSchema, CreatePostInput, createPostSchema } from "../validations/post.schema";
+import { CreatePostFormInput, createPostFormSchema, CreatePostInput, createPostSchema, deletePostSchema } from "../validations/post.schema";
 import { calculateReadingTime, generateSlug } from "@/app/_lib/utils";
-import { createPost, getPostBySlug } from "../dal/posts";
+import { checkUserOwnThePost, createPost, deletePostById, getPostBySlug, getPostByUserId } from "../dal/posts";
 import { revalidatePath } from "next/cache";
 
 export async function createPostAction(data: CreatePostFormInput) {
@@ -69,5 +69,41 @@ export async function createPostAction(data: CreatePostFormInput) {
       success: false,
       error: "Failed to create post. Please try again.",
     };
+  }
+}
+
+export async function deletePostAction(id: string) {
+  try {
+    // 1. Validate input
+    const validated = deletePostSchema.parse({ id })
+    
+    // 2. Authenticate user
+    const session = await getServerSession()
+    if (!session?.user) {
+      return { success: false, error: 'Unauthorized' }
+    }
+    
+    // 3. Authorization - check if user owns the post
+    const post = await checkUserOwnThePost(id)
+    
+    if (!post) {
+      return { success: false, error: 'Post not found' }
+    }
+    
+    if (post.authorId !== session.user.id) {
+      return { success: false, error: 'Forbidden: You do not own this post' }
+    }
+    
+    // 4. Call DAL to delete
+    await deletePostById(validated.id)
+    
+    // 5. Revalidate cache
+    revalidatePath('/profile')
+    revalidatePath('/blogs  ')
+    revalidatePath('/')
+    
+    return { success: true }
+  } catch (error) {
+    return { success: false, error: 'Failed to delete post' }
   }
 }

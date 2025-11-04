@@ -18,11 +18,13 @@ export default async function ArticlePage({
 
   // Find the article directly on the server
   const article = await getPostBySlug(slug);
-  const postCount = await getPostCountByAuthorId(article.authorId);
   // If article not found, trigger 404
   if (!article) {
     notFound();
   }
+
+  const postCount = await getPostCountByAuthorId(article?.authorId);
+
 
   const sections = [
     { id: "introduction", title: "Introduction" },
