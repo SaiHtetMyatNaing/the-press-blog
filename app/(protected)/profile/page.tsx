@@ -8,16 +8,27 @@ import { Separator } from "@/app/_components/ui/separator"
 import { getPostByUserId, getPostCountByAuthorId } from "@/server/dal/posts"
 import { getServerSession } from "@/app/_lib/get-session"
 import { redirect } from "next/navigation"
+import { getCategoryById } from "@/server/dal/categories"
 
 export default async function ProfilePage() { 
-  const  data  = await getServerSession()  
+  const data = await getServerSession()  
   
   if(!data?.user){
     redirect('/sign-in')
   }
 
-  const userPosts = await getPostByUserId(data?.user.id as string)
-
+  const userPosts = await getPostByUserId(data.user.id as string)
+  
+    // Fetch all categories upfront
+  const postsWithCategories = await Promise.all(
+    userPosts.map(async (post) => {
+      const category = await getCategoryById(post.categoryId)
+      return {
+        ...post,
+        categoryName: category || 'Uncategorized'
+      }
+    })
+  )
   return (
     <main className="min-h-screen bg-background">
       <div className="container max-w-5xl mx-auto px-4 py-12 sm:py-16 lg:py-20">
@@ -100,7 +111,7 @@ export default async function ProfilePage() {
                         <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
                           <span>{new Date(post.createdAt).toLocaleDateString()}</span>
                           <Separator orientation="vertical" className="h-4" />
-                          <Badge variant="secondary">{post.categoryId}</Badge>
+                          <Badge>{(getCategoryById(post.categoryId)) || 'Uncategorized'}</Badge> 
                           <Separator orientation="vertical" className="h-4" />
                           <span>{post.readingTime} min read</span>
                         </div>
@@ -130,4 +141,4 @@ export default async function ProfilePage() {
       </div>
     </main>
   )
-} 
+}
