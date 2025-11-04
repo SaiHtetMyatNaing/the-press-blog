@@ -1,9 +1,9 @@
 "use server"
 
 import { getServerSession } from "@/app/_lib/get-session";
-import { CreatePostFormInput, createPostFormSchema, CreatePostInput, createPostSchema, deletePostSchema } from "../validations/post.schema";
+import { CreatePostFormInput, createPostFormSchema, CreatePostInput, createPostSchema, deletePostSchema, UpdatePostInput} from "../validations/post.schema";
 import { calculateReadingTime, generateSlug } from "@/app/_lib/utils";
-import { checkUserOwnThePost, createPost, deletePostById, getPostBySlug, getPostByUserId } from "../dal/posts";
+import { checkUserOwnThePost, createPost, deletePostById, getPostBySlug, getPostByUserId, updatePostByById } from "../dal/posts";
 import { revalidatePath } from "next/cache";
 
 export async function createPostAction(data: CreatePostFormInput) {
@@ -105,5 +105,23 @@ export async function deletePostAction(id: string) {
     return { success: true }
   } catch (error) {
     return { success: false, error: 'Failed to delete post' }
+  }
+}
+
+
+export async function updatePostAction(data: UpdatePostInput, id: string) {
+  const session = await getServerSession()
+  if (!session?.user?.id) {
+    revalidatePath("/sign-in")
+  }
+  try {
+    const updated = await updatePostByById(data, id)
+    revalidatePath(`/article/${id}`)
+    revalidatePath("/profile")
+    revalidatePath("/")
+    return { success: true, post: updated }
+  } catch (error) {
+    console.error("Failed to update post:", error)
+    return { success: false, error: "Failed to update post" }
   }
 }

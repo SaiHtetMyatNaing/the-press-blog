@@ -3,7 +3,7 @@ import { cache } from "react";
 import { prisma } from "../db/prisma";
 import { getAllPostsResult, Post } from "../types/posts";
 import { Prisma } from "@prisma/client";
-import { CreatePostInput, createPostSchema } from "../validations/post.schema";
+import { CreatePostInput, createPostSchema, UpdatePostInput, updatePostSchema } from "../validations/post.schema";
 
 // Unified function to get all posts with optional category filter
 export const getAllPosts = cache(
@@ -202,6 +202,26 @@ export async function createPost(input: CreatePostInput) {
   });
 }
 
+export async function updatePostByById(data : UpdatePostInput , id : string){
+
+  const validatedData = updatePostSchema.parse(data)
+
+  // 2. Update post in database
+  const updatedPost = await prisma.post.update({
+    where: { id },
+    data: validatedData,
+    select: {
+      id: true,
+      title: true,
+      content: true,
+      categoryId: true,
+      readingTime: true,
+      updatedAt: true,
+    },
+  })
+  return updatedPost
+}
+
 export async function deletePostById(id : string){
     const deletedPost = await prisma.post.delete({
        where : {
@@ -216,7 +236,6 @@ export async function checkUserOwnThePost(id : string){
       where: { id },
       select: { authorId: true }
     })
-
     return post
 }
    

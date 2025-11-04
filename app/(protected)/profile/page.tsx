@@ -1,6 +1,5 @@
 import Link from "next/link"
 import { Edit2, Trash2, Plus } from "lucide-react"
-import { SAMPLE_POSTS } from "@/app/_lib/posts"
 import { Button } from "@/app/_components/ui/button"
 import { Card, CardContent } from "@/app/_components/ui/card"
 import { Badge } from "@/app/_components/ui/badge"
@@ -8,8 +7,6 @@ import { Separator } from "@/app/_components/ui/separator"
 import { getPostByUserId, getPostCountByAuthorId } from "@/server/dal/posts"
 import { getServerSession } from "@/app/_lib/get-session"
 import { redirect } from "next/navigation"
-import { getCategoryById } from "@/server/dal/categories"
-import { deletePostAction } from "@/server/actions/post.action"
 import { DeleteButton } from "@/app/_components/postDeleteButton"
 
 export default async function ProfilePage() { 
@@ -19,7 +16,7 @@ export default async function ProfilePage() {
     redirect('/sign-in')
   }
 
-  const userPosts = await getPostByUserId(data.user.id as string)
+  const userPosts = await getPostByUserId(data.user.id)
   
   return (
     <main className="min-h-screen bg-background">
@@ -110,7 +107,7 @@ export default async function ProfilePage() {
                       </div>
                       <div className="flex gap-2">
                         <Button asChild size="sm" variant="secondary">
-                          <Link href={`/profile/edit/${post.id}`}>
+                          <Link href={`/profile/edit/${post.slug}`}>
                             <Edit2 className="w-4 h-4 mr-1" />
                             <span className="hidden sm:inline">Edit</span>
                           </Link>
