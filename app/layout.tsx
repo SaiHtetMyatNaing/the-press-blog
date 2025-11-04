@@ -3,10 +3,11 @@ import type { Metadata } from "next"
 import { Inter, Lora } from "next/font/google"
 import { Analytics } from "@vercel/analytics/next"
 import "./globals.css"
-import Header from "@/components/header"
 import Footer from "@/components/footer"
 import { NuqsAdapter } from 'nuqs/adapters/next/app'
 import { Toaster } from "@/components/ui/sonner"
+import { Header } from "@/components/header"
+
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-sans" })
 const lora = Lora({ subsets: ["latin"], variable: "--font-serif" })
@@ -17,11 +18,12 @@ export const metadata: Metadata = {
   generator: "v0.app",
 }
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode
 }>) {
+
   return (
     <html lang="en">
       <body className={`${inter.variable} ${lora.variable} font-sans antialiased`}>

@@ -1,5 +1,3 @@
-"use client"
-
 import Link from "next/link"
 import { Edit2, Trash2, Plus } from "lucide-react"
 import { SAMPLE_POSTS } from "@/lib/posts"
@@ -7,18 +5,18 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
+import { getPostByUserId, getPostCountByAuthorId } from "@/server/dal/posts"
+import { getServerSession } from "@/lib/get-session"
+import { redirect } from "next/navigation"
 
-export default function ProfilePage() {
-  const userPosts = SAMPLE_POSTS.filter(
-    (post) => post.authorId === 'cmhewfszu0000tyt4vjrivzwl'
-  )
-
-  const handleDelete = (postId: string) => {
-    if (confirm("Are you sure you want to delete this post?")) {
-      console.log("Deleting post:", postId)
-      // Add real delete logic here later
-    }
+export default async function ProfilePage() { 
+  const  data  = await getServerSession()  
+  
+  if(!data?.user){
+    redirect('/sign-in')
   }
+
+  const userPosts = await getPostByUserId(data?.user.id as string)
 
   return (
     <main className="min-h-screen bg-background">
@@ -35,7 +33,7 @@ export default function ProfilePage() {
                 <Plus className="w-4 h-4 mr-2" />
                 New Article
               </Link>
-            </Button>
+            </Button> 
           </div>
 
           {/* Stats */}
@@ -62,7 +60,7 @@ export default function ProfilePage() {
               <CardContent className="p-6">
                 <p className="text-sm font-medium text-muted-foreground">Categories</p>
                 <p className="text-lg font-semibold mt-1">
-                  {new Set(userPosts.map((p) => p.category)).size}
+                  {new Set(userPosts.map((p) => p.categoryId)).size}
                 </p>
               </CardContent>
             </Card>
@@ -102,7 +100,7 @@ export default function ProfilePage() {
                         <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
                           <span>{new Date(post.createdAt).toLocaleDateString()}</span>
                           <Separator orientation="vertical" className="h-4" />
-                          <Badge variant="secondary">{post.category}</Badge>
+                          <Badge variant="secondary">{post.categoryId}</Badge>
                           <Separator orientation="vertical" className="h-4" />
                           <span>{post.readingTime} min read</span>
                         </div>
@@ -117,7 +115,6 @@ export default function ProfilePage() {
                         <Button
                           size="sm"
                           variant="destructive"
-                          onClick={() => handleDelete(post.id)}
                         >
                           <Trash2 className="w-4 h-4 mr-1" />
                           <span className="hidden sm:inline">Delete</span>

@@ -50,7 +50,7 @@ export function LoginForm() {
       const { error } = await signIn.email({
         email: data.email,
         password: data.password,
-        callbackURL: "/blogs",
+        callbackURL: "/profile",
       });
 
       if (error) {
@@ -60,7 +60,7 @@ export function LoginForm() {
 
       toast.success("Successfully Signed In");
       form.reset();
-      router.push("/blogs");
+      router.push("/profile");
     } catch (err) {
       toast.error("An unexpected error occurred. Please try again.");
     }

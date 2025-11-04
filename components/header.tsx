@@ -1,54 +1,73 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import Link from "next/link"
-import { usePathname, useRouter } from "next/navigation"
-import { Menu, Search, LogOut, User } from "lucide-react"
-
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
+import Link from "next/link";
+import { Menu, Search, LogOut, User } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
-import { Avatar, AvatarFallback } from "@/components/ui/avatar"
+  DropdownMenuLabel,
+} from "@/components/ui/dropdown-menu";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 
-export default function Header() {
-  const [mobileSearch, setMobileSearch] = useState("")
-  const router = useRouter()
-  const pathname = usePathname()
+import { usePathname, useRouter } from "next/navigation";
+import { useState } from "react";
+import { signOut, useSession } from "@/lib/auth-client";
 
-  const user = null // Set to true/object to test
+export function Header() {
+  const [mobileSearch, setMobileSearch] = useState("");
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const router = useRouter();
+  const pathname = usePathname();
+  const { data: session, isPending } = useSession();
 
-  const handleLogout = () => {
-    router.push("/")
-  }
+  const handleLogout = async () => {
+    setMobileOpen(false);
+    await signOut({
+      fetchOptions: {
+        onSuccess: () => {
+          router.push("/sign-in");
+        },
+        onError: () => {
+          router.push("/sign-in");
+        },
+      },
+    });
+  };
 
   const navItems = [
     { href: "/", label: "Home" },
     { href: "/blogs", label: "Blogs" },
-   { href: "/profile", label: "Profile" },
-  ].filter(Boolean)
+  ];
+
+  const avatarUrl = session?.user?.image ?? null;
+  const userName = session?.user?.email?.split("@")[0] ?? "User";
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur [backdrop-filter]:bg-background/60">
       <div className="flex h-16 items-center justify-between px-4 sm:px-6 lg:px-8">
-        {/* LEFT: Logo */}
         <Link href="/" className="flex items-center gap-2">
           <div className="flex h-8 w-8 items-center justify-center rounded-sm bg-primary">
-            <span className="font-serif text-lg font-bold text-primary-foreground">03</span>
+            <span className="font-serif text-lg font-bold text-primary-foreground">
+              03
+            </span>
           </div>
           <span className="hidden font-serif text-lg font-bold sm:inline-block">
             The Press
           </span>
         </Link>
 
-        {/* RIGHT: Nav + Auth */}
         <div className="flex items-center gap-6">
-          {/* Desktop Nav */}
           <nav className="hidden items-center gap-6 md:flex">
             {navItems.map((item) => (
               <Link
@@ -65,19 +84,23 @@ export default function Header() {
             ))}
           </nav>
 
-          {/* Desktop Auth */}
           <div className="hidden items-center gap-2 md:flex">
-            {user ? (
+            {session ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="sm" className="gap-2">
-                    <Avatar className="h-6 w-6">
-                      <AvatarFallback>U</AvatarFallback>
-                    </Avatar>
-                    <span className="hidden sm:inline">User</span>
-                  </Button>
+                  <Avatar className="h-9 w-9 cursor-pointer">
+                    {avatarUrl ? (
+                      <AvatarImage src={avatarUrl} alt={userName} />
+                    ) : null}
+                    <AvatarFallback className="cursor-pointer">
+                      {userName[0].toUpperCase()}
+                    </AvatarFallback>
+                  </Avatar>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-48">
+                  <DropdownMenuLabel className="font-medium">
+                    {session.user.email}
+                  </DropdownMenuLabel>
                   <DropdownMenuItem asChild>
                     <Link href="/profile" className="flex items-center gap-2">
                       <User className="h-4 w-4" />
@@ -96,30 +119,43 @@ export default function Header() {
             ) : (
               <>
                 <Button variant="ghost" size="sm" asChild>
-                  <Link href="/login">Sign In</Link>
+                  <Link href="/sign-in">Sign In</Link>
                 </Button>
                 <Button size="sm" asChild>
-                  <Link href="/signup">Sign Up</Link>
+                  <Link href="/sign-up">Sign Up</Link>
                 </Button>
               </>
             )}
           </div>
 
-          {/* Mobile Menu */}
-          <Sheet>
-            <SheetTrigger asChild>
+          <Dialog open={mobileOpen} onOpenChange={setMobileOpen}>
+            <DialogTrigger asChild>
               <Button variant="ghost" size="icon" className="md:hidden">
                 <Menu className="h-5 w-5" />
                 <span className="sr-only">Toggle menu</span>
               </Button>
-            </SheetTrigger>
-            <SheetContent side="right" className="w-80">
-              <div className="flex flex-col gap-6 pt-6">
+            </DialogTrigger>
+            <DialogContent className="w-80 sm:w-96 p-0">
+              <DialogHeader className="p-6 pb-4">
+                <DialogTitle className="flex items-center gap-3">
+                  {session && avatarUrl && (
+                    <Avatar className="h-8 w-8">
+                      <AvatarImage src={avatarUrl} alt={userName} />
+                      <AvatarFallback>
+                        {userName[0].toUpperCase()}
+                      </AvatarFallback>
+                    </Avatar>
+                  )}
+                  Menu
+                </DialogTitle>
+              </DialogHeader>
+              <div className="flex flex-col gap-6 px-6 pb-6">
                 <nav className="flex flex-col gap-1">
                   {navItems.map((item) => (
                     <Link
                       key={item.href}
                       href={item.href}
+                      onClick={() => setMobileOpen(false)}
                       className={`rounded-sm px-3 py-2 text-sm font-medium transition-colors ${
                         pathname === item.href
                           ? "bg-secondary/30 text-primary font-bold"
@@ -142,10 +178,17 @@ export default function Header() {
                 </div>
 
                 <div className="border-t pt-4">
-                  {user ? (
+                  {session ? (
                     <div className="space-y-1">
-                      <Button variant="ghost" className="w-full justify-start" asChild>
-                        <Link href="/profile">
+                      <Button
+                        variant="ghost"
+                        className="w-full justify-start"
+                        asChild
+                      >
+                        <Link
+                          href="/profile"
+                          onClick={() => setMobileOpen(false)}
+                        >
                           <User className="mr-2 h-4 w-4" />
                           Profile
                         </Link>
@@ -162,19 +205,29 @@ export default function Header() {
                   ) : (
                     <div className="space-y-2">
                       <Button variant="ghost" className="w-full" asChild>
-                        <Link href="/login">Sign In</Link>
+                        <Link
+                          href="/sign-in"
+                          onClick={() => setMobileOpen(false)}
+                        >
+                          Sign In
+                        </Link>
                       </Button>
                       <Button className="w-full" asChild>
-                        <Link href="/signup">Sign Up</Link>
+                        <Link
+                          href="/sign-up"
+                          onClick={() => setMobileOpen(false)}
+                        >
+                          Sign Up
+                        </Link>
                       </Button>
                     </div>
                   )}
                 </div>
               </div>
-            </SheetContent>
-          </Sheet>
+            </DialogContent>
+          </Dialog>
         </div>
       </div>
     </header>
-  )
+  );
 }

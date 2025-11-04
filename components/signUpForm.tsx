@@ -26,6 +26,7 @@ import Link from "next/link";
 
 import { signUp } from "@/lib/auth-client";
 import { toast } from "sonner";
+import { faker } from "@faker-js/faker";
 
 const signUpSchema = z
   .object({
@@ -60,7 +61,8 @@ export function SignUpForm() {
         name: signUpData.name,
         email: signUpData.email,
         password: signUpData.password,
-        callbackURL: "/blogs",
+        image : faker.image.url(),
+        callbackURL: "/profile",
       });
 
       if (error) {
@@ -70,7 +72,7 @@ export function SignUpForm() {
 
       toast.success("Sign Up Successful!");
       form.reset();
-      router.push("/blogs");
+      router.push("/profile");
     } catch (err) {
       toast.error("An unexpected error occurred. Please try again.");
     }

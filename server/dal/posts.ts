@@ -132,6 +132,15 @@ export async function getPostCount() {
   return await prisma.post.count();
 }
 
+//get posts by user name 
+export const getPostByUserId =async (id : string)=> {
+  return await prisma.post.findMany({
+    where : {
+       authorId : id
+    }
+  })
+}
+
 //get related post by Category id
 export async function getRelatedPosts(
   postId: string,
