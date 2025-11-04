@@ -4,7 +4,6 @@ import { prisma } from "../db/prisma";
 
 // Get all categories (to filter the UI)
 export const getAllCategories = cache(async()=>{
-    try {
         const categories = await prisma.category.findMany({
             select :{
                 id : true,
@@ -16,7 +15,5 @@ export const getAllCategories = cache(async()=>{
         })
 
         return categories
-    } catch(error){
-        throw new Error("Failed to fetch categories")
-    }
+    
 })

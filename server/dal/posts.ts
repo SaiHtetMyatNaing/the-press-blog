@@ -3,6 +3,7 @@ import { cache } from "react";
 import { prisma } from "../db/prisma";
 import { getAllPostsResult, Post } from "../types/posts";
 import { Prisma } from "@prisma/client";
+import { CreatePostInput, createPostSchema } from "../validations/post.schema";
 
 // Unified function to get all posts with optional category filter
 export const getAllPosts = cache(
@@ -96,7 +97,7 @@ export const getAllPosts = cache(
 );
 
 // Get all post by slug
-export const getPostBySlug = cache(async (slug: string): Promise<Post> => {
+export const getPostBySlug = cache(async (slug: string): Promise<Post | null> => {
   const single_post = await prisma.post.findUnique({
     where: { slug },
     include: {
@@ -109,10 +110,6 @@ export const getPostBySlug = cache(async (slug: string): Promise<Post> => {
       },
     },
   });
-
-  if (!single_post) {
-    throw new Error("Post not found");
-  }
 
   return single_post;
 });
@@ -132,14 +129,14 @@ export async function getPostCount() {
   return await prisma.post.count();
 }
 
-//get posts by user name 
-export const getPostByUserId =async (id : string)=> {
+//get posts by user name
+export const getPostByUserId = async (id: string) => {
   return await prisma.post.findMany({
-    where : {
-       authorId : id
-    }
-  })
-}
+    where: {
+      authorId: id,
+    },
+  });
+};
 
 //get related post by Category id
 export async function getRelatedPosts(
@@ -179,4 +176,23 @@ export async function getRelatedPosts(
   });
 
   return relatedPosts;
+}
+
+export async function createPost(input: CreatePostInput) {
+  const validatedData = createPostSchema.parse(input);
+   console.log(validatedData)
+  return await prisma.post.create({
+    data: validatedData,
+    include: {
+      author: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          image: true,
+        },
+      },
+      category: true,
+    },
+  });
 }
